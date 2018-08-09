@@ -271,21 +271,21 @@ class AdvertisingApi(object):
 
         data may contain the following optional parameters:
 
-        :param startIndex: 0-indexed record offset for the result set. 
+        :param startIndex: 0-indexed record offset for the result set.
             Defaults to 0.
         :type startIndex: Integer
-        :param count: Number of records to include in the paged response. 
+        :param count: Number of records to include in the paged response.
             Defaults to max page size.
         :type count: Integer
-        :param campaignType: Restricts results to campaigns of a single 
+        :param campaignType: Restricts results to campaigns of a single
             campaign type. Must be **sponsoredProducts**.
         :type campaignType: String
-        :param stateFilter: Restricts results to campaigns with state within 
-            the specified comma-separatedlist. Must be one of **enabled**, 
+        :param stateFilter: Restricts results to campaigns with state within
+            the specified comma-separatedlist. Must be one of **enabled**,
             **paused**, **archived**. Default behavior is to include all.
         :param name: Restricts results to campaigns with the specified name.
         :type name: String
-        :param campaignFilterId: Restricts results to campaigns specified in 
+        :param campaignFilterId: Restricts results to campaigns specified in
             comma-separated list.
         :type campaignFilterId: String
         :returns:
@@ -477,7 +477,7 @@ class AdvertisingApi(object):
 
     def get_biddable_keyword(self, keyword_id):
         """
-        Retrieves a keyword by ID. Note that this call returns the minimal set 
+        Retrieves a keyword by ID. Note that this call returns the minimal set
         of keyword fields, but is more efficient than getBiddableKeywordEx.
 
         :GET: /keywords/{keywordId}
@@ -494,9 +494,9 @@ class AdvertisingApi(object):
 
     def get_biddable_keyword_ex(self, keyword_id):
         """
-        Retrieves a keyword and its extended fields by ID. Note that this call 
-        returns the complete set of keyword fields (including serving status 
-        and other read-only fields), but is less efficient than 
+        Retrieves a keyword and its extended fields by ID. Note that this call
+        returns the complete set of keyword fields (including serving status
+        and other read-only fields), but is less efficient than
         getBiddableKeyword.
 
         :GET: /keywords/extended/{keywordId}
@@ -513,12 +513,12 @@ class AdvertisingApi(object):
 
     def create_biddable_keywords(self, data):
         """
-        Creates one or more keywords. Successfully created keywords will be 
+        Creates one or more keywords. Successfully created keywords will be
         assigned unique keywordIds.
 
         :POST: /keywords
-        :param data: A list of up to 1000 keywords to be created. Required 
-            fields for keyword creation are campaignId, adGroupId, keywordText, 
+        :param data: A list of up to 1000 keywords to be created. Required
+            fields for keyword creation are campaignId, adGroupId, keywordText,
             matchType and state.
         :type data: List of **Keyword**
         """
@@ -672,12 +672,11 @@ class AdvertisingApi(object):
     def get_report(self, report_id):
         interface = 'reports/{}'.format(report_id)
         res = self._operation(interface)
-        if json.loads(res['response'])['status'] == 'SUCCESS':
-            res = self._download(
-                location=json.loads(res['response'])['location'])
-            return res
-        else:
-            return res
+        if res['success']:
+            body = json.loads(res['response'])
+            if body.get('status') == 'SUCCESS':
+                res = self._download(location=body['location'])
+        return res
 
     def get_snapshot(self, snapshot_id):
         interface = 'snapshots/{}'.format(snapshot_id)
