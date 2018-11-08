@@ -267,7 +267,7 @@ class AdvertisingApi(object):
         interface = 'campaigns/{}'.format(campaign_id)
         return self._operation(interface, method='DELETE')
 
-    def list_campaigns(self, campaign_type='sp', data=None):
+    def list_campaigns(self, data=None, campaign_type='sp'):
         """
         Retrieves a list of campaigns satisfying optional criteria.
 
@@ -304,7 +304,7 @@ class AdvertisingApi(object):
         interface = '{}/campaigns' .format(campaign_type)
         return self._operation(interface, data)
 
-    def list_campaigns_ex(self, campaign_type='sp', data=None):
+    def list_campaigns_ex(self, data=None, campaign_type='sp'):
         """
         Retrieves a list of campaigns with extended fields satisfying
         optional filtering criteria.
@@ -667,7 +667,7 @@ class AdvertisingApi(object):
                     'code': 0,
                     'response': 'record_type and snapshot_id are both empty.'}
 
-    def request_report(self, campaign_type='sp', record_type=None, report_id=None, data=None):
+    def request_report(self, record_type=None, report_id=None, data=None, campaign_type='sp'):
         """
         :POST: /{campaignType}/reports
 
