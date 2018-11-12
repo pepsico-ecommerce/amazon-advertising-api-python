@@ -174,39 +174,45 @@ class AdvertisingApi(object):
         interface = 'profiles'
         return self._operation(interface, data, method='PUT')
 
-    def get_campaign(self, campaign_id):
+    def get_campaign(self, campaign_id, campaign_type='sp'):
         """
         Retrieves a campaign by Id. Note that this call returns the minimal
         set of campaign fields, but is more efficient than **getCampaignEx**.
 
-        :GET: /campaigns/{campaignId}
+        :GET: {campaignType}/campaigns/{campaignId}
         :param campaign_id: The Id of the requested campaign.
         :type campaign_id: string
+        :param campaign_type: The campaignType of the requested campaign ('sp' or 'hsa')
+          Defaults to 'sp'
+        :type campaign_type: string
         :returns:
             :200: Campaign
             :401: Unauthorized
             :404: Campaign not found
         """
-        interface = 'campaigns/{}'. format(campaign_id)
+        interface = '{}/campaigns/{}'. format(campaign_type, campaign_id)
         return self._operation(interface)
 
-    def get_campaign_ex(self, campaign_id):
+    def get_campaign_ex(self, campaign_id, campaign_type='sp'):
         """
         Retrieves a campaign and its extended fields by ID. Note that this
         call returns the complete set of campaign fields (including serving
         status and other read-only fields), but is less efficient than
         **getCampaign**.
 
-        :GET: /campaigns/extended/{campaignId}
+        :GET: {campaignType}/campaigns/extended/{campaignId}
         :param campaign_id: The Id of the requested campaign.
         :type campaign_id: string
+        :param campaign_type: The campaignType of the requested campaign ('sp' or 'hsa')
+          Defaults to 'sp'
+        :type campaign_type: string
         :returns:
             :200: Campaign
             :401: Unauthorized
             :404: Campaign not found
 
         """
-        interface = 'campaigns/extended/{}'. format(campaign_id)
+        interface = '{}/campaigns/extended/{}'. format(campaign_type, campaign_id)
         return self._operation(interface)
 
     def create_campaigns(self, data):
@@ -261,11 +267,14 @@ class AdvertisingApi(object):
         interface = 'campaigns/{}'.format(campaign_id)
         return self._operation(interface, method='DELETE')
 
-    def list_campaigns(self, data=None):
+    def list_campaigns(self, data=None, campaign_type='sp'):
         """
         Retrieves a list of campaigns satisfying optional criteria.
 
-        :GET: /campaigns
+        :GET: /{campaignType}/campaigns
+        :param campaign_type: The campaignType to retrieve campaigns for ('sp' or 'hsa')
+          Defaults to 'sp'
+        :type campaign_type: string
         :param data: Optional, search criteria containing the following
             parameters.
 
@@ -292,20 +301,23 @@ class AdvertisingApi(object):
             :200: Success. list of campaign
             :401: Unauthorized
         """
-        interface = 'campaigns'
+        interface = '{}/campaigns' .format(campaign_type)
         return self._operation(interface, data)
 
-    def list_campaigns_ex(self, data=None):
+    def list_campaigns_ex(self, data=None, campaign_type='sp'):
         """
         Retrieves a list of campaigns with extended fields satisfying
         optional filtering criteria.
 
-        :GET: /campaigns/extended
+        :GET: /{campaignType}/campaigns/extended
+        :param campaign_type: campaignType of the requested campaigns ('sp' or 'hsa')
+          Defaults to 'sp'
+        :type campaign_type: string
         :param data: Optional, search criteria containing the following
             parameters.
         :type data: JSON string
         """
-        interface = 'campaigns/extended'
+        interface = '{}/campaigns/extended' .format(campaign_type)
         return self._operation(interface, data)
 
     def get_ad_group(self, ad_group_id):
@@ -313,7 +325,7 @@ class AdvertisingApi(object):
         Retrieves an ad group by Id. Note that this call returns the minimal
         set of ad group fields, but is more efficient than getAdGroupEx.
 
-        :GET: /adGroups/{adGroupId}
+        :GET: /sp/adGroups/{adGroupId}
         :param ad_group_id: The Id of the requested ad group.
         :type ad_group_id: string
 
@@ -322,7 +334,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Ad group not found
         """
-        interface = 'adGroups/{}'.format(ad_group_id)
+        interface = 'sp/adGroups/{}'.format(ad_group_id)
         return self._operation(interface)
 
     def get_ad_group_ex(self, ad_group_id):
@@ -332,7 +344,7 @@ class AdvertisingApi(object):
         status and other read-only fields), but is less efficient than
         getAdGroup.
 
-        :GET: /adGroups/extended/{adGroupId}
+        :GET: /sp/adGroups/extended/{adGroupId}
         :param ad_group_id: The Id of the requested ad group.
         :type ad_group_id: string
 
@@ -341,7 +353,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Ad group not found
         """
-        interface = 'adGroups/extended/{}'.format(ad_group_id)
+        interface = 'sp/adGroups/extended/{}'.format(ad_group_id)
         return self._operation(interface)
 
     def create_ad_groups(self, data):
@@ -402,7 +414,7 @@ class AdvertisingApi(object):
         """
         Retrieves a list of ad groups satisfying optional criteria.
 
-        :GET: /adGroups
+        :GET: /sp/adGroups
         :param data: Parameter list of criteria.
 
         data may contain the following optional parameters:
@@ -434,14 +446,14 @@ class AdvertisingApi(object):
             :401: Unauthorized.
 
         """
-        interface = 'adGroups'
+        interface = 'sp/adGroups'
         return self._operation(interface, data)
 
     def list_ad_groups_ex(self, data=None):
         """
         Retrieves a list of ad groups satisfying optional criteria.
 
-        :GET: /adGroups/extended
+        :GET: /sp/adGroups/extended
         :param data: Parameter list of criteria.
 
         data may contain the following optional parameters:
@@ -472,24 +484,27 @@ class AdvertisingApi(object):
             :200: Success. List of adGroup.
             :401: Unauthorized.
         """
-        interface = 'adGroups/extended'
+        interface = 'sp/adGroups/extended'
         return self._operation(interface, data)
 
-    def get_biddable_keyword(self, keyword_id):
+    def get_biddable_keyword(self, keyword_id, campaign_type='sp'):
         """
         Retrieves a keyword by ID. Note that this call returns the minimal set
         of keyword fields, but is more efficient than getBiddableKeywordEx.
 
-        :GET: /keywords/{keywordId}
+        :GET: /{campaignType}/keywords/{keywordId}
         :param keyword_id: The Id of the requested keyword.
         :type keyword_id: string
+        :param campaign_type: The campaignType for the requested keyword
+          Defaults to 'sp'
+        :type campaign_type: string
 
         :returns:
             :200: Success. Keyword.
             :401: Unauthorized.
             :404: Keyword not found.
         """
-        interface = 'keywords/{}'.format(keyword_id)
+        interface = '{}/keywords/{}'.format(campaign_type, keyword_id)
         return self._operation(interface)
 
     def get_biddable_keyword_ex(self, keyword_id):
@@ -508,7 +523,7 @@ class AdvertisingApi(object):
             :401: Unauthorized.
             :404: Keyword not found.
         """
-        interface = 'keywords/extended/{}'.format(keyword_id)
+        interface = 'sp/keywords/extended/{}'.format(keyword_id)
         return self._operation(interface)
 
     def create_biddable_keywords(self, data):
@@ -534,19 +549,19 @@ class AdvertisingApi(object):
         return self._operation(interface, method='DELETE')
 
     def list_biddable_keywords(self, data=None):
-        interface = 'keywords'
+        interface = 'sp/keywords'
         return self._operation(interface, data)
 
     def list_biddable_keywords_ex(self, data=None):
-        interface = 'keywords/extended'
+        interface = 'sp/keywords/extended'
         return self._operation(interface, data)
 
     def get_negative_keyword(self, negative_keyword_id):
-        interface = 'negativeKeywords/{}'.format(negative_keyword_id)
+        interface = 'sp/negativeKeywords/{}'.format(negative_keyword_id)
         return self._operation(interface)
 
     def get_negative_keyword_ex(self, negative_keyword_id):
-        interface = 'negativeKeywords/extended/{}'.format(negative_keyword_id)
+        interface = 'sp/negativeKeywords/extended/{}'.format(negative_keyword_id)
         return self._operation(interface)
 
     def create_negative_keywords(self, data):
@@ -562,20 +577,20 @@ class AdvertisingApi(object):
         return self._operation(interface, method='DELETE')
 
     def list_negative_keywords(self, data=None):
-        interface = 'negativeKeywords'
+        interface = 'sp/negativeKeywords'
         return self._operation(interface, data)
 
     def list_negative_keywords_ex(self, data=None):
-        interface = 'negativeKeywords/extended'
+        interface = 'sp/negativeKeywords/extended'
         return self._operation(interface, data)
 
     def get_campaign_negative_keyword(self, campaign_negative_keyword_id):
-        interface = 'campaignNegativeKeywords/{}'.format(
+        interface = 'sp/campaignNegativeKeywords/{}'.format(
             campaign_negative_keyword_id)
         return self._operation(interface)
 
     def get_campaign_negative_keyword_ex(self, campaign_negative_keyword_id):
-        interface = 'campaignNegativeKeywords/extended/{}'.format(
+        interface = 'sp/campaignNegativeKeywords/extended/{}'.format(
             campaign_negative_keyword_id)
         return self._operation(interface)
 
@@ -593,19 +608,19 @@ class AdvertisingApi(object):
         return self._operation(interface, method='DELETE')
 
     def list_campaign_negative_keywords(self, data=None):
-        interface = 'campaignNegativeKeywords'
+        interface = 'sp/campaignNegativeKeywords'
         return self._operation(interface, data)
 
     def list_campaign_negative_keywords_ex(self, data=None):
-        interface = 'campaignNegativeKeywords/extended'
+        interface = 'sp/campaignNegativeKeywords/extended'
         return self._operation(interface, data)
 
     def get_product_ad(self, product_ad_id):
-        interface = 'productAds/{}'.format(product_ad_id)
+        interface = 'sp/productAds/{}'.format(product_ad_id)
         return self._operation(interface)
 
     def get_product_ad_ex(self, product_ad_id):
-        interface = 'productAds/extended/{}'.format(product_ad_id)
+        interface = 'sp/productAds/extended/{}'.format(product_ad_id)
         return self._operation(interface)
 
     def create_product_ads(self, data):
@@ -620,17 +635,21 @@ class AdvertisingApi(object):
         pass
 
     def list_product_ads(self, data=None):
-        interface = 'productAds'
+        interface = 'sp/productAds'
         return self._operation(interface, data)
 
     def list_product_ads_ex(self, data=None):
-        interface = 'productAds/extended'
+        interface = 'sp/productAds/extended'
         return self._operation(interface, data)
 
     def request_snapshot(self, record_type=None, snapshot_id=None, data=None):
         """
+        :POST: /snapshots
+
         Required data:
-        * :campaignType:  The type of campaign for which snapshot should be generated. Must be sponsoredProducts.
+        * :campaignType: The type of campaign for which snapshot should be
+          generated. Must be one of 'sponsoredProducts' or 'headlineSearch'
+          Defaults to 'sponsoredProducts.
         """
         if not data:
             data = {'campaignType': 'sponsoredProducts'}
@@ -648,18 +667,16 @@ class AdvertisingApi(object):
                     'code': 0,
                     'response': 'record_type and snapshot_id are both empty.'}
 
-    def request_report(self, record_type=None, report_id=None, data=None):
+    def request_report(self, record_type=None, report_id=None, data=None, campaign_type='sp'):
         """
-        Required data:
-        * :campaignType:  The type of campaign for which report should be generated. Must be sponsoredProducts.
-        """
-        if not data:
-            data = {'campaignType': 'sponsoredProducts'}
-        elif not data.get('campaignType'):
-            data['campaignType'] = 'sponsoredProducts'
+        :POST: /{campaignType}/reports
 
+        :param campaign_type: The campaignType to request the report for ('sp' or 'hsa')
+          Defaults to 'sp'
+        :type data: string
+        """
         if record_type is not None:
-            interface = '{}/report'.format(record_type)
+            interface = '{}/{}/report'.format(campaign_type, record_type)
             return self._operation(interface, data, method='POST')
         elif report_id is not None:
             interface = 'reports/{}'.format(report_id)
@@ -764,6 +781,7 @@ class AdvertisingApi(object):
                     'response': 'access_token is empty.'}
 
         headers = {'Authorization': 'Bearer {}'.format(self._access_token),
+                   'Amazon-Advertising-API-ClientId': self.client_id,
                    'Content-Type': 'application/json',
                    'User-Agent': self.user_agent}
 
