@@ -67,3 +67,5 @@ localtest.py
 
 # Pycharm
 *.idea/
+
+venv/*

@@ -487,6 +487,334 @@ class AdvertisingApi(object):
         interface = 'sp/adGroups/extended'
         return self._operation(interface, data)
 
+    def get_target(self, target_id):
+        """
+        Retrieves an ad group by Id. Note that this call returns the minimal
+        set of ad group fields, but is more efficient than getAdGroupEx.
+
+        :GET: /sp/targets/{targetId}
+        :param target_id: The Id of the requested ad group.
+        :type target_id: string
+
+        :returns:
+            :200: Success, Target response
+            :401: Unauthorized
+            :404: Ad group not found
+        """
+        interface = 'sp/targets/{}'.format(ad_group_id)
+        return self._operation(interface)
+
+    def get_target_ex(self, target_id):
+        """
+        Retrieves a target and its extended fields by ID. Note that this
+        call returns the complete set of target fields (including serving
+        status and other read-only fields), but is less efficient than
+        getTarget.
+
+        :GET: /sp/targets/extended/{adGroupId}
+        :param target_id: The Id of the requested target.
+        :type target_id: string
+
+        :returns:
+            :200: Success, Target response
+            :401: Unauthorized
+            :404: Target not found
+        """
+        interface = 'sp/targets/extended/{}'.format(ad_group_id)
+        return self._operation(interface)
+
+    def create_targets(self, data):
+        """
+        Creates one or more ad groups. Successfully created ad groups will
+        be assigned unique adGroupIds.
+
+        :POST: /targets
+        :param data: A list of up to 100 targets to be created.
+        :type data: List of **Target**
+
+        :returns:
+            :207: Multi-status. List of AdGroupResponse reflecting the same
+                order as the input
+            :401: Unauthorized
+        """
+        interface = 'targets'
+        return self._operation(interface, data, method='POST')
+
+    def update_targets(self, data):
+        """
+        Updates one or more targets. Targets are identified using their
+        targetId.
+
+        :PUT: /targets
+        :param data: A list of up to 100 updates containing targetIds and the
+            mutable fields to be modified.
+        :type data: List of **Target**
+
+        :returns:
+            :207: Multi-status. List of Targets reflecting the same
+                order as the input
+            :401: Unauthorized
+        """
+        interface = 'targets'
+        return self._operation(interface, data, method='PUT')
+
+    def archive_target(self, ad_group_id):
+        """
+        Sets the ad group status to archived. This same operation can be
+        performed via an update, but is included for completeness.
+
+        :DELETE: /targets/{targetId}
+        :param target_id: The Id of the ad group to be archived.
+        :type target_id: string
+
+        :returns:
+            :200: Success. TargetResponse
+            :401: Unauthorized
+            :404: Ad group not found
+        """
+        interface = 'targets/{}'.format(target_id)
+        return self._operation(interface, method='DELETE')
+
+    def list_targets(self, data=None):
+        """
+        Retrieves a list of targets satisfying optional criteria.
+
+        :GET: /sp/targets
+        :param data: Parameter list of criteria.
+
+        data may contain the following optional parameters:
+
+        :param startIndex: 0-indexed record offset for the result
+            set. Defaults to 0.
+        :type startIndex: integer
+        :param count: Number of records to include in the paged response.
+            Defaults to max page size.
+        :type count: integer
+        :param expressionTypeFilter: Restricts results to targets
+            with expression types within the specified comma-separated list.
+            Possible filter types are: auto and manual
+        :type expressionTypeFilter: string
+        :param expressionTextFilter: Content of the targeting expression
+        :type expressionTextFilter: string
+        :param campaignIdFilter: Restricts results to ad groups within
+            campaigns specified in comma-separated list.
+        :type campaignIdFilter: string
+        :param adGroupIdFilter: Restricts results to ad groups specified in
+            comma-separated list.
+        :type adGroupIdFilter: string
+        :param stateFilter: Restricts results to targets with state within the
+            specified comma-separatedlist. Must be one of enabled, paused,
+            archived.  Default behavior is to include all.
+        :type stateFilter: string
+        :returns:
+            :200: Success. List of Targets.
+            :401: Unauthorized.
+        """
+        interface = 'sp/targets'
+        return self._operation(interface, data)
+
+    def list_targets_ex(self, data=None):
+        """
+        Retrieves a list of targets satisfying optional criteria.
+
+        :GET: /sp/targets/extended
+        :param data: Parameter list of criteria.
+
+        data may contain the following optional parameters:
+
+        :param startIndex: 0-indexed record offset for the result
+            set. Defaults to 0.
+        :type startIndex: integer
+        :param count: Number of records to include in the paged response.
+            Defaults to max page size.
+        :type count: integer
+        :param expressionTypeFilter: Restricts results to targets
+            with expression types within the specified comma-separated list.
+            Possible filter types are: auto and manual
+        :type expressionTypeFilter: string
+        :param expressionTextFilter: Content of the targeting expression
+        :type expressionTextFilter: string
+        :param campaignIdFilter: Restricts results to ad groups within
+            campaigns specified in comma-separated list.
+        :type campaignIdFilter: string
+        :param adGroupIdFilter: Restricts results to ad groups specified in
+            comma-separated list.
+        :type adGroupIdFilter: string
+        :param stateFilter: Restricts results to targets with state within the
+            specified comma-separatedlist. Must be one of enabled, paused,
+            archived.  Default behavior is to include all.
+        :type stateFilter: string
+        :returns:
+            :200: Success. List of Targets.
+            :401: Unauthorized.
+        """
+        interface = 'sp/targets/extended'
+        return self._operation(interface, data)
+
+    def get_negative_target(self, target_id):
+        """
+        Retrieves an ad group by Id. Note that this call returns the minimal
+        set of ad group fields, but is more efficient than getAdGroupEx.
+
+        :GET: /sp/negativeTargets/{targetId}
+        :param target_id: The Id of the requested ad group.
+        :type target_id: string
+
+        :returns:
+            :200: Success, Target response
+            :401: Unauthorized
+            :404: Ad group not found
+        """
+        interface = 'sp/negativeTargets/{}'.format(ad_group_id)
+        return self._operation(interface)
+
+    def get_negative_target_ex(self, target_id):
+        """
+        Retrieves a target and its extended fields by ID. Note that this
+        call returns the complete set of target fields (including serving
+        status and other read-only fields), but is less efficient than
+        getTarget.
+
+        :GET: /sp/negativeTargets/extended/{adGroupId}
+        :param target_id: The Id of the requested target.
+        :type target_id: string
+
+        :returns:
+            :200: Success, Target response
+            :401: Unauthorized
+            :404: Target not found
+        """
+        interface = 'sp/negativeTargets/extended/{}'.format(ad_group_id)
+        return self._operation(interface)
+
+    def create_negative_targets(self, data):
+        """
+        Creates one or more ad groups. Successfully created ad groups will
+        be assigned unique adGroupIds.
+
+        :POST: /negativeTargets
+        :param data: A list of up to 100 negativeTargets to be created.
+        :type data: List of **Target**
+
+        :returns:
+            :207: Multi-status. List of AdGroupResponse reflecting the same
+                order as the input
+            :401: Unauthorized
+        """
+        interface = 'negativeTargets'
+        return self._operation(interface, data, method='POST')
+
+    def update_negative_targets(self, data):
+        """
+        Updates one or more negativeTargets. negativeTargets are identified using their
+        targetId.
+
+        :PUT: /negativeTargets
+        :param data: A list of up to 100 updates containing targetIds and the
+            mutable fields to be modified.
+        :type data: List of **Target**
+
+        :returns:
+            :207: Multi-status. List of negativeTargets reflecting the same
+                order as the input
+            :401: Unauthorized
+        """
+        interface = 'negativeTargets'
+        return self._operation(interface, data, method='PUT')
+
+    def archive_negative_target(self, ad_group_id):
+        """
+        Sets the ad group status to archived. This same operation can be
+        performed via an update, but is included for completeness.
+
+        :DELETE: /negativeTargets/{targetId}
+        :param target_id: The Id of the ad group to be archived.
+        :type target_id: string
+
+        :returns:
+            :200: Success. TargetResponse
+            :401: Unauthorized
+            :404: Ad group not found
+        """
+        interface = 'negativeTargets/{}'.format(target_id)
+        return self._operation(interface, method='DELETE')
+
+    def list_negative_targets(self, data=None):
+        """
+        Retrieves a list of negativeTargets satisfying optional criteria.
+
+        :GET: /sp/negativeTargets
+        :param data: Parameter list of criteria.
+
+        data may contain the following optional parameters:
+
+        :param startIndex: 0-indexed record offset for the result
+            set. Defaults to 0.
+        :type startIndex: integer
+        :param count: Number of records to include in the paged response.
+            Defaults to max page size.
+        :type count: integer
+        :param expressionTypeFilter: Restricts results to negativeTargets
+            with expression types within the specified comma-separated list.
+            Possible filter types are: auto and manual
+        :type expressionTypeFilter: string
+        :param expressionTextFilter: Content of the targeting expression
+        :type expressionTextFilter: string
+        :param campaignIdFilter: Restricts results to ad groups within
+            campaigns specified in comma-separated list.
+        :type campaignIdFilter: string
+        :param adGroupIdFilter: Restricts results to ad groups specified in
+            comma-separated list.
+        :type adGroupIdFilter: string
+        :param stateFilter: Restricts results to negativeTargets with state within the
+            specified comma-separatedlist. Must be one of enabled, paused,
+            archived.  Default behavior is to include all.
+        :type stateFilter: string
+        :returns:
+            :200: Success. List of negativeTargets.
+            :401: Unauthorized.
+        """
+        interface = 'sp/negativeTargets'
+        return self._operation(interface, data)
+
+    def list_negative_targets_ex(self, data=None):
+        """
+        Retrieves a list of negativeTargets satisfying optional criteria.
+
+        :GET: /sp/negativeTargets/extended
+        :param data: Parameter list of criteria.
+
+        data may contain the following optional parameters:
+
+        :param startIndex: 0-indexed record offset for the result
+            set. Defaults to 0.
+        :type startIndex: integer
+        :param count: Number of records to include in the paged response.
+            Defaults to max page size.
+        :type count: integer
+        :param expressionTypeFilter: Restricts results to negativeTargets
+            with expression types within the specified comma-separated list.
+            Possible filter types are: auto and manual
+        :type expressionTypeFilter: string
+        :param expressionTextFilter: Content of the targeting expression
+        :type expressionTextFilter: string
+        :param campaignIdFilter: Restricts results to ad groups within
+            campaigns specified in comma-separated list.
+        :type campaignIdFilter: string
+        :param adGroupIdFilter: Restricts results to ad groups specified in
+            comma-separated list.
+        :type adGroupIdFilter: string
+        :param stateFilter: Restricts results to negativeTargets with state within the
+            specified comma-separatedlist. Must be one of enabled, paused,
+            archived.  Default behavior is to include all.
+        :type stateFilter: string
+        :returns:
+            :200: Success. List of negativeTargets.
+            :401: Unauthorized.
+        """
+        interface = 'sp/negativeTargets/extended'
+        return self._operation(interface, data)
+
     def get_biddable_keyword(self, keyword_id, campaign_type='sp'):
         """
         Retrieves a keyword by ID. Note that this call returns the minimal set
