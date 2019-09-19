@@ -320,7 +320,7 @@ class AdvertisingApi(object):
         interface = '{}/campaigns/extended' .format(campaign_type)
         return self._operation(interface, data)
 
-    def get_ad_group(self, ad_group_id):
+    def get_ad_group(self, ad_group_id, campaign_type='sp'):
         """
         Retrieves an ad group by Id. Note that this call returns the minimal
         set of ad group fields, but is more efficient than getAdGroupEx.
@@ -334,10 +334,10 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Ad group not found
         """
-        interface = 'sp/adGroups/{}'.format(ad_group_id)
+        interface = '{}/adGroups/{}'.format(campaign_type, ad_group_id)
         return self._operation(interface)
 
-    def get_ad_group_ex(self, ad_group_id):
+    def get_ad_group_ex(self, ad_group_id, campaign_type='sp'):
         """
         Retrieves an ad group and its extended fields by ID. Note that this
         call returns the complete set of ad group fields (including serving
@@ -353,10 +353,10 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Ad group not found
         """
-        interface = 'sp/adGroups/extended/{}'.format(ad_group_id)
+        interface = '{}/adGroups/extended/{}'.format(campaign_type, ad_group_id)
         return self._operation(interface)
 
-    def create_ad_groups(self, data):
+    def create_ad_groups(self, data, campaign_type='sp'):
         """
         Creates one or more ad groups. Successfully created ad groups will
         be assigned unique adGroupIds.
@@ -372,10 +372,10 @@ class AdvertisingApi(object):
                 order as the input
             :401: Unauthorized
         """
-        interface = 'adGroups'
+        interface = '{}/adGroups'.format(campaign_type)
         return self._operation(interface, data, method='POST')
 
-    def update_ad_groups(self, data):
+    def update_ad_groups(self, data, campaign_type='sp'):
         """
         Updates one or more ad groups. Ad groups are identified using their
         adGroupIds.
@@ -390,10 +390,10 @@ class AdvertisingApi(object):
                 order as the input
             :401: Unauthorized
         """
-        interface = 'adGroups'
+        interface = '{}/adGroups'.format(campaign_type)
         return self._operation(interface, data, method='PUT')
 
-    def archive_ad_group(self, ad_group_id):
+    def archive_ad_group(self, ad_group_id, campaign_type="sp"):
         """
         Sets the ad group status to archived. This same operation can be
         performed via an update, but is included for completeness.
@@ -407,10 +407,10 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Ad group not found
         """
-        interface = 'adGroups/{}'.format(ad_group_id)
+        interface = '{}/adGroups/{}'.format(campaign_type, ad_group_id)
         return self._operation(interface, method='DELETE')
 
-    def list_ad_groups(self, data=None):
+    def list_ad_groups(self, data=None, campaign_type="sp"):
         """
         Retrieves a list of ad groups satisfying optional criteria.
 
@@ -446,10 +446,10 @@ class AdvertisingApi(object):
             :401: Unauthorized.
 
         """
-        interface = 'sp/adGroups'
+        interface = '{}/adGroups'.format(campaign_type)
         return self._operation(interface, data)
 
-    def list_ad_groups_ex(self, data=None):
+    def list_ad_groups_ex(self, data=None, campaign_type="sp"):
         """
         Retrieves a list of ad groups satisfying optional criteria.
 
@@ -484,7 +484,7 @@ class AdvertisingApi(object):
             :200: Success. List of adGroup.
             :401: Unauthorized.
         """
-        interface = 'sp/adGroups/extended'
+        interface = '{}/adGroups/extended'.format(campaign_type)
         return self._operation(interface, data)
 
     def get_target(self, target_id):
@@ -537,7 +537,7 @@ class AdvertisingApi(object):
                 order as the input
             :401: Unauthorized
         """
-        interface = 'targets'
+        interface = 'sp/targets'
         return self._operation(interface, data, method='POST')
 
     def update_targets(self, data):
@@ -555,7 +555,7 @@ class AdvertisingApi(object):
                 order as the input
             :401: Unauthorized
         """
-        interface = 'targets'
+        interface = 'sp/targets'
         return self._operation(interface, data, method='PUT')
 
     def archive_target(self, ad_group_id):
@@ -701,7 +701,7 @@ class AdvertisingApi(object):
                 order as the input
             :401: Unauthorized
         """
-        interface = 'negativeTargets'
+        interface = 'sp/negativeTargets'
         return self._operation(interface, data, method='POST')
 
     def update_negative_targets(self, data):
@@ -854,7 +854,7 @@ class AdvertisingApi(object):
         interface = 'sp/keywords/extended/{}'.format(keyword_id)
         return self._operation(interface)
 
-    def create_biddable_keywords(self, data):
+    def create_biddable_keywords(self, data, campaign_type='sp'):
         """
         Creates one or more keywords. Successfully created keywords will be
         assigned unique keywordIds.
@@ -865,7 +865,7 @@ class AdvertisingApi(object):
             matchType and state.
         :type data: List of **Keyword**
         """
-        interface = 'keywords'
+        interface = '{}/keywords'.format(campaign_type)
         return self._operation(interface, data, method='POST')
 
     def update_biddable_keywords(self, data):
@@ -892,8 +892,8 @@ class AdvertisingApi(object):
         interface = 'sp/negativeKeywords/extended/{}'.format(negative_keyword_id)
         return self._operation(interface)
 
-    def create_negative_keywords(self, data):
-        interface = 'negativeKeywords'
+    def create_negative_keywords(self, data, campaign_type="sp"):
+        interface = '{}/negativeKeywords'.format(campaign_type)
         return self._operation(interface, data, method='POST')
 
     def update_negative_keywords(self, data):
@@ -962,12 +962,12 @@ class AdvertisingApi(object):
     def archive_product_ads(self):
         pass
 
-    def list_product_ads(self, data=None):
-        interface = 'sp/productAds'
+    def list_product_ads(self, data=None, campaign_type="sp"):
+        interface = '{}/productAds'.format(campaign_type)
         return self._operation(interface, data)
 
-    def list_product_ads_ex(self, data=None):
-        interface = 'sp/productAds/extended'
+    def list_product_ads_ex(self, data=None, campaign_type="sp"):
+        interface = '{}/productAds/extended'.format(campaign_type)
         return self._operation(interface, data)
 
     def request_snapshot(self, record_type=None, snapshot_id=None, data=None):
