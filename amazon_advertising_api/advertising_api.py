@@ -501,7 +501,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Ad group not found
         """
-        interface = 'sp/targets/{}'.format(ad_group_id)
+        interface = 'sp/targets/{}'.format(target_id)
         return self._operation(interface)
 
     def get_target_ex(self, target_id):
@@ -520,7 +520,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Target not found
         """
-        interface = 'sp/targets/extended/{}'.format(ad_group_id)
+        interface = 'sp/targets/extended/{}'.format(target_id)
         return self._operation(interface)
 
     def create_targets(self, data):
@@ -572,7 +572,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Ad group not found
         """
-        interface = 'targets/{}'.format(target_id)
+        interface = 'targets/{}'.format(ad_group_id)
         return self._operation(interface, method='DELETE')
 
     def list_targets(self, data=None):
@@ -665,7 +665,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Ad group not found
         """
-        interface = 'sp/negativeTargets/{}'.format(ad_group_id)
+        interface = 'sp/negativeTargets/{}'.format(target_id)
         return self._operation(interface)
 
     def get_negative_target_ex(self, target_id):
@@ -684,7 +684,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Target not found
         """
-        interface = 'sp/negativeTargets/extended/{}'.format(ad_group_id)
+        interface = 'sp/negativeTargets/extended/{}'.format(target_id)
         return self._operation(interface)
 
     def create_negative_targets(self, data):
@@ -736,7 +736,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Ad group not found
         """
-        interface = 'negativeTargets/{}'.format(target_id)
+        interface = 'negativeTargets/{}'.format(ad_group_id)
         return self._operation(interface, method='DELETE')
 
     def list_negative_targets(self, data=None):
