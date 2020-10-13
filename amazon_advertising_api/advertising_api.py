@@ -182,7 +182,7 @@ class AdvertisingApi(object):
         :GET: {campaignType}/campaigns/{campaignId}
         :param campaign_id: The Id of the requested campaign.
         :type campaign_id: string
-        :param campaign_type: The campaignType of the requested campaign ('sp' or 'hsa' or 'sb')
+        :param campaign_type: The campaignType of the requested campaign ('sp' or 'sb')
           Defaults to 'sp'
         :type campaign_type: string
         :returns:
@@ -206,7 +206,7 @@ class AdvertisingApi(object):
         :GET: {campaignType}/campaigns/extended/{campaignId}
         :param campaign_id: The Id of the requested campaign.
         :type campaign_id: string
-        :param campaign_type: The campaignType of the requested campaign ('sp' or 'hsa' or 'sb')
+        :param campaign_type: The campaignType of the requested campaign ('sp' or 'sb')
           Defaults to 'sp'
         :type campaign_type: string
         :returns:
