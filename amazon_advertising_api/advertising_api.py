@@ -1117,7 +1117,7 @@ class AdvertisingApi(object):
         # not tested
         return self._operation(interface, data, method='POST')
 
-    def request_snapshot(self, record_type=None, snapshot_id=None, data=None):
+    def request_snapshot(self, record_type=None, snapshot_id=None, data=None, campaign_type='sp'):
         """
         :POST: /snapshots
 
@@ -1125,6 +1125,7 @@ class AdvertisingApi(object):
         * :campaignType: The type of campaign for which snapshot should be
           generated. Must be one of 'sponsoredProducts' or 'headlineSearch'
           Defaults to 'sponsoredProducts.
+          :campaign_type: Should be 'hsa' or 'sp'
         """
         if not data:
             data = {'campaignType': 'sponsoredProducts'}
@@ -1132,10 +1133,10 @@ class AdvertisingApi(object):
             data['campaignType'] = 'sponsoredProducts'
 
         if record_type is not None:
-            interface = '{}/snapshot'.format(record_type)
+            interface = '{}/{}/snapshot'.format(campaign_type, record_type)
             return self._operation(interface, data, method='POST')
         elif snapshot_id is not None:
-            interface = 'snapshots/{}'.format(snapshot_id)
+            interface = '{}/snapshots/{}'.format(campaign_type, snapshot_id)
             return self._operation(interface, data)
         else:
             return {'success': False,
