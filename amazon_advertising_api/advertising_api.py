@@ -1169,7 +1169,7 @@ class AdvertisingApi(object):
         :param method: Call method. Should be either 'GET', 'PUT', or 'POST'
         :type method: string
         """
-        api_v3 = True if interface.startswith('sb') else False
+        api_v3 = interface.startswith('sb')
 
         if self._access_token is None:
             return {'success': False,
