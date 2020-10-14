@@ -1170,6 +1170,8 @@ class AdvertisingApi(object):
         :type method: string
         """
         api_v3 = interface.startswith('sb')
+        if api_v3:
+            self.api_version = versions['api_version_sb']
 
         if self._access_token is None:
             return {'success': False,
