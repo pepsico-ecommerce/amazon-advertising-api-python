@@ -1213,10 +1213,10 @@ class AdvertisingApi(object):
         try:
             f = urllib.request.urlopen(req)
             return {
+                'success': True,
                 'api_version': self.api_version,
-                'data': {'success': True,
-                         'code': f.code,
-                         'response': f.read().decode('utf-8')}}
+                'code': f.code,
+                'data': f.read().decode('utf-8')}
 
         except urllib.error.HTTPError as e:
             return {'success': False,
