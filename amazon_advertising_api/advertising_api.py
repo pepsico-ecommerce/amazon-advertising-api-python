@@ -1170,8 +1170,6 @@ class AdvertisingApi(object):
         :type method: string
         """
         api_v3 = interface.startswith('sb')
-        if api_v3:
-            self.api_version = versions['api_version_sb']
 
         if self._access_token is None:
             return {'success': False,
@@ -1216,7 +1214,7 @@ class AdvertisingApi(object):
             f = urllib.request.urlopen(req)
             return {
                 'success': True,
-                'api_version': self.api_version,
+                'api_version': self.api_version if not api_v3 else versions['api_version_sb'],
                 'code': f.code,
                 'data': f.read().decode('utf-8')}
 
