@@ -192,8 +192,6 @@ class AdvertisingApi(object):
         """
         interface = '{}/campaigns/{}'. format(campaign_type, campaign_id)
 
-        if campaign_type == 'sb':
-            return self._operation(interface, api_v3=True)
         return self._operation(interface)
 
     def get_campaign_ex(self, campaign_id, campaign_type='sp'):
@@ -217,9 +215,6 @@ class AdvertisingApi(object):
         """
         interface = '{}/campaigns/extended/{}'. format(campaign_type, campaign_id)
 
-        if campaign_type == 'sb':
-            return self._operation(interface, api_v3=True)
-
         return self._operation(interface)
 
     def create_campaigns(self, data, campaign_type='sp'):
@@ -237,12 +232,7 @@ class AdvertisingApi(object):
                 input.
             :401: Unauthorized
         """
-
-        if campaign_type == 'sb':
-            interface = '{}/campaigns'.format(campaign_type)
-            return self._operation(interface, data, method='POST', api_v3=True)
-
-        interface = 'campaigns'
+        interface = '{}/campaigns'.format(campaign_type)
         return self._operation(interface, data, method='POST')
 
     def update_campaigns(self, data, campaign_type='sp'):
@@ -260,12 +250,7 @@ class AdvertisingApi(object):
                 input
             :401: Unauthorized
         """
-
-        if campaign_type == 'sb':
-            interface = '{}/campaigns'.format(campaign_type)
-            return self._operation(interface, data, method='PUT', api_v3=True)
-
-        interface = 'campaigns'
+        interface = '{}/campaigns'.format(campaign_type)
         return self._operation(interface, data, method='PUT')
 
     def get_campaigns(self, campaign_type='sp'):
@@ -277,11 +262,7 @@ class AdvertisingApi(object):
             :207: List of **CampaignResponse**
             :401: Unauthorized
         """
-        if campaign_type == 'sb':
-            interface = '{}/campaigns'.format(campaign_type)
-            return self._operation(interface, api_v3=True)
-
-        interface = 'campaigns'
+        interface = '{}/campaigns'.format(campaign_type)
         return self._operation(interface)
 
     def archive_campaign(self, campaign_id, campaign_type='sp'):
@@ -297,12 +278,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Campaign not found
         """
-
-        if campaign_type == 'sb':
-            interface = '{}/campaigns'.format(campaign_type)
-            return self._operation(interface, method='DELETE', api_v3=True)
-
-        interface = 'campaigns/{}'.format(campaign_id)
+        interface = '{}/campaigns/{}'.format(campaign_type, campaign_id)
         return self._operation(interface, method='DELETE')
 
     def list_campaigns(self, data=None, campaign_type='sp'):
@@ -340,8 +316,6 @@ class AdvertisingApi(object):
             :401: Unauthorized
         """
         interface = '{}/campaigns' .format(campaign_type)
-        if campaign_type == 'sb':
-            return self._operation(interface, data, api_v3=True)
 
         return self._operation(interface, data)
 
@@ -377,8 +351,6 @@ class AdvertisingApi(object):
         """
         interface = '{}/adGroups/{}'.format(campaign_type, ad_group_id)
 
-        if campaign_type == 'sb':
-            return self._operation(interface, api_v3=True)
         return self._operation(interface)
 
     def get_ad_group_ex(self, ad_group_id, campaign_type='sp'):
@@ -492,8 +464,6 @@ class AdvertisingApi(object):
         """
         interface = '{}/adGroups'.format(campaign_type)
 
-        if campaign_type == 'sb':
-            return self._operation(interface, data, api_v3=True)
         return self._operation(interface, data)
 
     def list_ad_groups_ex(self, data=None, campaign_type="sp"):
@@ -549,8 +519,7 @@ class AdvertisingApi(object):
             :404: Ad group not found
         """
         interface = '{}/targets/{}'.format(campaign_type, target_id)
-        if campaign_type == 'sb':
-            return self._operation(interface, api_v3=True)
+
         return self._operation(interface)
 
     def get_target_ex(self, target_id):
@@ -587,8 +556,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
         """
         interface = '{}/targets'.format(campaign_type)
-        if campaign_type == 'sb':
-            return self._operation(interface, data, method='POST', api_v3=True)
+
         return self._operation(interface, data, method='POST')
 
     def create_targets_list(self, data, campaign_type='sp'):
@@ -605,8 +573,6 @@ class AdvertisingApi(object):
             :401: Unauthorized
         """
         interface = '{}/targets/list'.format(campaign_type)
-        if campaign_type == 'sb':
-            return self._operation(interface, data, method='POST', api_v3=True)
 
         # not tested
         return self._operation(interface, data, method='POST')
@@ -627,8 +593,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
         """
         interface = '{}/targets'.format(campaign_type)
-        if campaign_type == 'sb':
-            return self._operation(interface, data, method='PUT', api_v3=True)
+
         return self._operation(interface, data, method='PUT')
 
     def archive_target(self, ad_group_id, campaign_type='sp'):
@@ -645,11 +610,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Ad group not found
         """
-        if campaign_type == 'sb':
-            interface = '{}/targets/{}'.format(campaign_type, ad_group_id)
-            return self._operation(interface, method='DELETE', api_v3=True)
-
-        interface = 'targets/{}'.format(ad_group_id)
+        interface = '{}/targets/{}'.format(campaign_type, ad_group_id)
         return self._operation(interface, method='DELETE')
 
     def list_targets(self, data=None):
@@ -743,8 +704,7 @@ class AdvertisingApi(object):
             :404: Ad group not found
         """
         interface = '{}/negativeTargets/{}'.format(campaign_type, target_id)
-        if campaign_type == 'sb':
-            return self._operation(interface, api_v3=True)
+
         return self._operation(interface)
 
     def get_negative_target_ex(self, target_id):
@@ -781,8 +741,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
         """
         interface = '{}/negativeTargets'.format(campaign_type)
-        if campaign_type =='sb':
-            return self._operation(interface, data, method='POST', api_v3=True)
+
         return self._operation(interface, data, method='POST')
 
     def create_negative_targets_list(self, data, campaign_type='sb'):
@@ -799,8 +758,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
         """
         interface = '{}/negativeTargets/list'.format(campaign_type)
-        if campaign_type == 'sb':
-            return self._operation(interface, data, method='POST', api_v3=True)
+
         return self._operation(interface, data, method='POST')
 
     def update_negative_targets(self, data, campaign_type='sp'):
@@ -818,10 +776,7 @@ class AdvertisingApi(object):
                 order as the input
             :401: Unauthorized
         """
-        if campaign_type == 'sb':
-            interface = '{}/negativeTargets'.format(campaign_type)
-            return self._operation(interface, data, method='PUT', api_v3=True)
-        interface = 'negativeTargets'
+        interface = '{}/negativeTargets'.format(campaign_type)
         return self._operation(interface, data, method='PUT')
 
     def archive_negative_target(self, ad_group_id, campaign_type='sp'):
@@ -838,11 +793,7 @@ class AdvertisingApi(object):
             :401: Unauthorized
             :404: Ad group not found
         """
-        if campaign_type == 'sb':
-            interface = '{}/negativeTargets/{}'.format(campaign_type, ad_group_id)
-            return self._operation(interface, method='DELETE', api_v3=True)
-
-        interface = 'negativeTargets/{}'.format(ad_group_id)
+        interface = '{}/negativeTargets/{}'.format(campaign_type, ad_group_id)
         return self._operation(interface, method='DELETE')
 
     def list_negative_targets(self, data=None):
@@ -939,8 +890,7 @@ class AdvertisingApi(object):
             :404: Keyword not found.
         """
         interface = '{}/keywords/{}'.format(campaign_type, keyword_id)
-        if campaign_type == 'sb':
-            return self._operation(interface, api_v3=True)
+
         return self._operation(interface)
 
     def get_biddable_keyword_ex(self, keyword_id):
@@ -975,30 +925,18 @@ class AdvertisingApi(object):
         """
         interface = '{}/keywords'.format(campaign_type)
 
-        if campaign_type == 'sb':
-            return self._operation(interface, data, api_v3=True)
         return self._operation(interface, data)
 
     def update_biddable_keywords(self, data, campaign_type='sp'):
-        if campaign_type == 'sb':
-            interface = 'sb/keywords'
-            return self._operation(interface, data, method='PUT', api_v3=True)
-
-        interface = 'sp/keywords'
+        interface = '{}/keywords'.format(campaign_type)
         return self._operation(interface, data, method='PUT')
 
     def archive_biddable_keyword(self, keyword_id, campaign_type='sp'):
-        interface = 'keywords/{}'.format(keyword_id)
-
-        if campaign_type == 'sb':
-            return self._operation(interface, method='DELETE', api_v3=True)
+        interface = '{}/keywords/{}'.format(campaign_type, keyword_id)
         return self._operation(interface, method='DELETE')
 
     def list_biddable_keywords(self, data=None, campaign_type='sp'):
-        if campaign_type == 'sb':
-            interface = 'sb/keywords'
-            return self._operation(interface, data, api_v3=True)
-        interface = 'sp/keywords'
+        interface = '{}/keywords'.format(campaign_type)
         return self._operation(interface, data)
 
     def list_biddable_keywords_ex(self, data=None):
@@ -1006,11 +944,7 @@ class AdvertisingApi(object):
         return self._operation(interface, data)
 
     def get_negative_keyword(self, negative_keyword_id, campaign_type='sp'):
-        if campaign_type == 'sb':
-            interface = 'sb/negativeKeywords/{}'.format(negative_keyword_id)
-            return self._operation(interface, api_v3=True)
-
-        interface = 'sp/negativeKeywords/{}'.format(negative_keyword_id)
+        interface = '{}/negativeKeywords/{}'.format(campaign_type, negative_keyword_id)
         return self._operation(interface)
 
     def get_negative_keyword_ex(self, negative_keyword_id):
@@ -1020,31 +954,18 @@ class AdvertisingApi(object):
     def create_negative_keywords(self, data, campaign_type="sp"):
         interface = '{}/negativeKeywords'.format(campaign_type)
 
-        if campaign_type == 'sb':
-            return self._operation(interface, data, method='POST', api_v3=True)
-
         return self._operation(interface, data, method='POST')
 
     def update_negative_keywords(self, data, campaign_type='sp'):
-            if campaign_type == 'sb':
-                interface = 'sb/negativeKeywords'
-                return self._operation(interface, data, method='PUT', api_v3=True)
-
-            interface = 'negativeKeywords'
-            return self._operation(interface, data, method='PUT')
+        interface = '{}/negativeKeywords'.format(campaign_type)
+        return self._operation(interface, data, method='PUT')
 
     def archive_negative_keyword(self, negative_keyword_id, campaign_type='sp'):
-        if campaign_type == 'sb':
-            interface = 'sb/negativeKeywords/{}'.format(negative_keyword_id)
-            return self._operation(interface, method='DELETE', api_v3=True)
-        interface = 'negativeKeywords/{}'.format(negative_keyword_id)
+        interface = '{}/negativeKeywords/{}'.format(campaign_type, negative_keyword_id)
         return self._operation(interface, method='DELETE')
 
     def list_negative_keywords(self, data=None, campaign_type='sp'):
         interface = '{}/negativeKeywords'.format(campaign_type)
-        if campaign_type == 'sb':
-            return self._operation(interface, data, api_v3=True)
-
         return self._operation(interface, data)
 
     def list_negative_keywords_ex(self, data=None):
@@ -1110,11 +1031,8 @@ class AdvertisingApi(object):
         return self._operation(interface, data)
 
     def create_keyword_recommendations(self, data, campaign_type='sp'):
-        interface = '{}/recommendations/keyword'
-        if campaign_type == 'sb':
-            return self._operation(interface, data, method='POST', api_v3=True)
+        interface = '{}/recommendations/keyword'.format(campaign_type)
 
-        # not tested
         return self._operation(interface, data, method='POST')
 
     def request_snapshot(self, record_type=None, snapshot_id=None, data=None, campaign_type='sp'):
@@ -1240,7 +1158,7 @@ class AdvertisingApi(object):
                     'code': e.code,
                     'response': '{msg}: {details}'.format(msg=e.msg, details=e.read())}
 
-    def _operation(self, interface, params=None, method='GET', api_v3=False):
+    def _operation(self, interface, params=None, method='GET'):
         """
         Makes that actual API call.
 
@@ -1251,6 +1169,8 @@ class AdvertisingApi(object):
         :param method: Call method. Should be either 'GET', 'PUT', or 'POST'
         :type method: string
         """
+        api_v3 = True if interface.startswith('sb') else False
+
         if self._access_token is None:
             return {'success': False,
                     'code': 0,
@@ -1271,17 +1191,7 @@ class AdvertisingApi(object):
 
         data = None
 
-        if api_v3:
-            url = 'https://{host}/{interface}'.format(
-                host=self.endpoint,
-                interface=interface
-            )
-        else:
-            url = 'https://{host}/{api_version}/{interface}'.format(
-                host=self.endpoint,
-                api_version=self.api_version,
-                interface=interface
-            )
+        url = f"https://{self.endpoint}/" + (f"{self.api_version}/" if api_v3 else "") + f"{interface}"
 
         if method == 'GET':
             if params is not None:
