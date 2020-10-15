@@ -76,17 +76,6 @@ spec:
     - - name: get-package-name
         template: generate-name
 
-    - - name: run-tests
-        template: python
-        arguments:
-          parameters:
-          - name: cmd
-            value: >
-              pip install pipenv -q &&
-              pipenv install --dev &&
-              pipenv run pytest --disable-pytest-warnings &&
-              pipenv run flake8 {{steps.get-package-name.outputs.result}}
-
     - - name: pack-and-push
         template: python
         arguments:

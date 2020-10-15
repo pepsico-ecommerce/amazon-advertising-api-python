@@ -82,17 +82,6 @@ spec:
               cd /workdir/{{workflow.parameters.repo_name}} &&
               git checkout master
 
-    - - name: run-tests
-        template: python
-        arguments:
-          parameters:
-          - name: cmd
-            value: >
-              pip install pipenv -q &&
-              pipenv install --dev &&
-              pipenv run pytest --disable-pytest-warnings &&
-              pipenv run flake8 {{steps.get-package-name.outputs.result}}
-
     - - name: alpha-version-bump
         template: python
         arguments:
