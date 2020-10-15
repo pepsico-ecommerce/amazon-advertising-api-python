@@ -1,0 +1,267 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: amazon-advertising-api-python-master-
+spec:
+  # entrypoint is the name of the template used as the starting point of the workflow
+  entrypoint: run-check
+  onExit: exit-handler
+  arguments:
+    parameters:
+    - name: git_url
+      value: HAS_TO_BE_PASSED_FROM_SENSOR
+    - name: repo_name
+      value: HAS_TO_BE_PASSED_FROM_SENSOR
+    - name: commit_message
+      value: HAS_TO_BE_PASSED_FROM_SENSOR
+    - name: sha
+      value: HAS_TO_BE_PASSED_FROM_SENSOR
+  # a temporary volume, named workdir, will be used as a working directory
+  # for this workflow. This volume is passed around from step to step.
+  volumeClaimTemplates:
+  - metadata:
+      name: workdir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+  volumes:
+    - name: sshkey
+      secret:
+        secretName: argo-ci-git-ssh-key
+        items:
+          - key: id_rsa
+            mode: 0400
+            path: id_rsa
+    - name: known-hosts
+      secret:
+        secretName: known-github
+    - name: pypirc
+      secret:
+        secretName: nexus-pypi
+        items:
+          - key: .pypirc
+            path: .pypirc
+
+
+
+  templates:
+  - name: run-check
+    steps:
+    - - name: check-commit-messsage
+        template: check-message-script
+
+    - - name: run-build
+        template: run-build
+        when: "{{steps.check-commit-messsage.outputs.result}} != skip"
+
+
+  - name: run-build
+    steps:
+    - - name: set-pending
+        template: status-update
+        arguments:
+          parameters:
+          - name: status
+            value: pending
+          - name: message
+            value: Argo CI tests has been started
+
+    - - name: get-package-name
+        template: generate-name
+
+    - - name: checkout
+        template: git
+        arguments:
+          parameters:
+          - name: cmd
+            value: >
+              cd /workdir &&
+              git clone {{workflow.parameters.git_url}} &&
+              cd /workdir/{{workflow.parameters.repo_name}} &&
+              git checkout master
+
+    - - name: run-tests
+        template: python
+        arguments:
+          parameters:
+          - name: cmd
+            value: >
+              pip install pipenv -q &&
+              pipenv install --dev --keep-outdated &&
+              pipenv run airflow initdb &&
+              pipenv run pytest --disable-pytest-warnings &&
+              pipenv run flake8 {{steps.get-package-name.outputs.result}}
+
+    - - name: alpha-version-bump
+        template: python
+        arguments:
+          parameters:
+          - name: cmd
+            value: >
+              pip install bump2version &&
+              git config --global user.email 'argo-ci@pepsi.co' &&
+              git config --global user.name 'Argo CI' &&
+              bump2version patch
+              --verbose
+              --allow-dirty
+              --no-commit
+
+    - - name: pack-and-push
+        template: python
+        arguments:
+          parameters:
+          - name: cmd
+            value: >
+              pip install twine &&
+              python3 setup.py sdist bdist_wheel &&
+              twine upload --config-file /etc/pypirc/.pypirc -r pepsico-ecommerce-dev dist/*
+
+    - - name: version-bump
+        template: python
+        arguments:
+          parameters:
+          - name: cmd
+            value: >
+              pip install bump2version &&
+              git config --global user.email 'argo-ci@pepsi.co' &&
+              git config --global user.name 'Argo CI' &&
+              bump2version release
+              --serialize {major}.{minor}.{patch}
+              --verbose
+              --allow-dirty
+
+    - - name: git-push
+        template: git
+        arguments:
+          parameters:
+          - name: cmd
+            value: >
+              cd /workdir/{{workflow.parameters.repo_name}} &&
+              git push origin master
+
+
+
+  - name: exit-handler
+    steps:
+    - - name: success
+        template: status-update
+        arguments:
+          parameters:
+          - name: status
+            value: success
+          - name: message
+            value: Version bumped and package deployed.
+        when: "{{workflow.status}} == Succeeded"
+      - name: failure
+        template: status-update
+        arguments:
+          parameters:
+          - name: status
+            value: failure
+          - name: message
+            value: Something went wrong, check logs in details.
+        when: "{{workflow.status}} != Succeeded"
+
+  - name: git
+    inputs:
+      parameters:
+      - name: cmd
+    container:
+      image: "alpine/git"
+      command: ["sh", "-c"]
+      args:
+        - >
+          git config --global user.email 'argo-ci@pepsi.co' &&
+          git config --global user.name 'Argo CI' &&
+          {{inputs.parameters.cmd}}
+      volumeMounts:
+      - name: workdir
+        mountPath: /workdir
+      - name: sshkey
+        mountPath: /root/.ssh
+      - mountPath: /etc/ssh
+        name: known-hosts
+
+  - name: python
+    inputs:
+      parameters:
+      - name: cmd
+    container:
+      image: "python:3.7-buster"
+      command: ["sh", "-c"]
+      args:
+        - >
+          cd /workdir/{{workflow.parameters.repo_name}} &&
+          {{inputs.parameters.cmd}}
+      volumeMounts:
+      - name: workdir
+        mountPath: /workdir
+      - name: pypirc
+        mountPath: /etc/pypirc/
+      env:
+        - name: NEXUS_PYPI_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nexus-pypi-ro-creds
+              key: password
+        - name: NEXUS_PYPI_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: nexus-pypi-ro-creds
+              key: username
+
+  - name: status-update
+    inputs:
+      parameters:
+      - name: status
+      - name: message
+    container:
+      image: cloudposse/github-status-updater
+      env:
+      - name: GITHUB_ACTION
+        value: update_state
+      - name: GITHUB_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: github-access-token
+            key: token
+      - name: GITHUB_OWNER
+        value: pepsico-ecommerce
+      - name: GITHUB_REPO
+        value: "{{workflow.parameters.repo_name}}"
+      - name: GITHUB_REF
+        value: "{{workflow.parameters.sha}}"
+      - name: GITHUB_CONTEXT
+        value: Dev package published
+      - name: GITHUB_STATE
+        value: "{{inputs.parameters.status}}"
+      - name: GITHUB_DESCRIPTION
+        value: "{{inputs.parameters.message}}"
+      - name: GITHUB_TARGET_URL
+        value: "https://argo-wf.pepstaging.com/workflows/argo-events/{{workflow.name}}"
+
+  - name: check-message-script
+    script:
+      image: python:alpine3.7
+      command: [python]
+      source: |
+        message = """
+        {{workflow.parameters.commit_message}}
+        """
+        if "Bump version:" in message:
+            print("skip")
+        else:
+            print("Letsbuildbitches")
+
+  - name: generate-name
+    script:
+      image: python:alpine3.7
+      command: [python]
+      source: |
+        repo_name = """
+        {{workflow.parameters.repo_name}}
+        """
+        package_name = repo_name.strip().replace('"', '').replace("'", "").replace('-', '_')
+        print(package_name)
