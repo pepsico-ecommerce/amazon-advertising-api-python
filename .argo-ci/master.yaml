@@ -91,7 +91,7 @@ spec:
               pip install bump2version &&
               git config --global user.email 'argo-ci@pepsi.co' &&
               git config --global user.name 'Argo CI' &&
-              bump2version minor
+              bump2version patch
               --verbose
               --allow-dirty
               --no-commit
@@ -116,7 +116,7 @@ spec:
               git config --global user.email 'argo-ci@pepsi.co' &&
               git config --global user.name 'Argo CI' &&
               bump2version release
-              --serialize {major}.{minor}
+              --serialize {major}.{minor}.{patch}
               --verbose
               --allow-dirty
 
