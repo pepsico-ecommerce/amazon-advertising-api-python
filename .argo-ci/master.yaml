@@ -91,7 +91,7 @@ spec:
               pip install bump2version &&
               git config --global user.email 'argo-ci@pepsi.co' &&
               git config --global user.name 'Argo CI' &&
-              bump2version patch
+              bump2version minor
               --verbose
               --allow-dirty
               --no-commit
@@ -116,7 +116,7 @@ spec:
               git config --global user.email 'argo-ci@pepsi.co' &&
               git config --global user.name 'Argo CI' &&
               bump2version release
-              --serialize {major}.{minor}.{patch}
+              --serialize {major}.{minor}
               --verbose
               --allow-dirty
 
@@ -241,7 +241,7 @@ spec:
         if "Bump version:" in message:
             print("skip")
         else:
-            print("Letsbuildbitches")
+            print("Building")
 
   - name: generate-name
     script:
