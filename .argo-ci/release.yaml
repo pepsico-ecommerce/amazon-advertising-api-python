@@ -83,7 +83,7 @@ spec:
           - name: cmd
             value: >
               pip install pipenv -q &&
-              pipenv install --dev --keep-outdated &&
+              pipenv install --dev &&
               pipenv run pytest --disable-pytest-warnings &&
               pipenv run flake8 {{steps.get-package-name.outputs.result}}
 
