@@ -1,8 +1,6 @@
-import configparser
-import os
-
-from amazon_advertising_api.regions import regions
+from amazon_advertising_api import versions as v
 from amazon_advertising_api.versions import versions
+from amazon_advertising_api.regions import regions
 from io import BytesIO
 try:
     # Python 3
@@ -53,11 +51,8 @@ class AdvertisingApi(object):
 
         self.api_version = versions['api_version']
 
-        config = configparser.RawConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__), '../.bumpversion.cfg'))
-        self.application_version = config.get('bumpversion', 'current_version')
         self.user_agent = 'AdvertisingAPI Python Client Library v{}'.format(
-            self.application_version)
+            v.__version__)
 
         self.profile_id = profile_id
         self.token_url = None
