@@ -1,4 +1,5 @@
 import configparser
+import os
 
 from amazon_advertising_api.regions import regions
 from amazon_advertising_api.versions import versions
@@ -53,7 +54,7 @@ class AdvertisingApi(object):
         self.api_version = versions['api_version']
 
         config = configparser.RawConfigParser()
-        config.read('../.bumpversion.cfg')
+        config.read(os.path.join(os.path.dirname(__file__), '../.bumpversion.cfg'))
         self.application_version = config.get('bumpversion', 'current_version')
         self.user_agent = 'AdvertisingAPI Python Client Library v{}'.format(
             self.application_version)
