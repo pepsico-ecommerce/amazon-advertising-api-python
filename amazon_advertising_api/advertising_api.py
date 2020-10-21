@@ -1,5 +1,6 @@
-from amazon_advertising_api.regions import regions
+from amazon_advertising_api import versions as v
 from amazon_advertising_api.versions import versions
+from amazon_advertising_api.regions import regions
 from io import BytesIO
 try:
     # Python 3
@@ -49,8 +50,10 @@ class AdvertisingApi(object):
         self.refresh_token = refresh_token
 
         self.api_version = versions['api_version']
+
         self.user_agent = 'AdvertisingAPI Python Client Library v{}'.format(
-            versions['application_version'])
+            v.__version__)
+
         self.profile_id = profile_id
         self.token_url = None
 
