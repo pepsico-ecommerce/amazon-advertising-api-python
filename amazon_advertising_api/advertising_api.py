@@ -1194,7 +1194,7 @@ class AdvertisingApi(object):
 
         data = None
 
-        url = f"https://{self.endpoint}/" + (f"{self.api_version}/" if api_v3 else "") + f"{interface}"
+        url = f"https://{self.endpoint}/" + ("" if api_v3 else f"{self.api_version}/") + f"{interface}"
 
         if method == 'GET':
             if params is not None:
