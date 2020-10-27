@@ -1043,10 +1043,7 @@ class AdvertisingApi(object):
         :POST: /snapshots
 
         Required data:
-        * :campaignType: The type of campaign for which snapshot should be
-          generated. Must be one of 'sponsoredProducts' or 'headlineSearch'
-          Defaults to 'sponsoredProducts.
-          :campaign_type: Should be 'hsa' or 'sp'
+        * :campaign_type: Should be 'hsa' or 'sp'
         """
         if record_type is not None:
             interface = '{}/{}/snapshot'.format(campaign_type, record_type)
