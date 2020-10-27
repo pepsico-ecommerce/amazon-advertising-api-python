@@ -1087,7 +1087,7 @@ class AdvertisingApi(object):
         interface = 'reports/{}'.format(report_id)
         res = self._operation(interface)
         if res['success']:
-            body = json.loads(res['response'])
+            body = json.loads(res['data'])
             if body.get('status') == 'SUCCESS':
                 res = self._download(location=body['location'])
         return res
@@ -1095,9 +1095,9 @@ class AdvertisingApi(object):
     def get_snapshot(self, snapshot_id):
         interface = 'snapshots/{}'.format(snapshot_id)
         res = self._operation(interface)
-        if json.loads(res['response'])['status'] == 'SUCCESS':
+        if json.loads(res['data'])['status'] == 'SUCCESS':
             res = self._download(
-                location=json.loads(res['response'])['location'])
+                location=json.loads(res['data'])['location'])
             return res
         else:
             return res
