@@ -1043,16 +1043,8 @@ class AdvertisingApi(object):
         :POST: /snapshots
 
         Required data:
-        * :campaignType: The type of campaign for which snapshot should be
-          generated. Must be one of 'sponsoredProducts' or 'headlineSearch'
-          Defaults to 'sponsoredProducts.
           :campaign_type: Should be 'hsa' or 'sp'
         """
-        if not data:
-            data = {'campaignType': 'sponsoredProducts'}
-        elif not data.get('campaignType'):
-            data['campaignType'] = 'sponsoredProducts'
-
         if record_type is not None:
             interface = '{}/{}/snapshot'.format(campaign_type, record_type)
             return self._operation(interface, data, method='POST')
@@ -1219,7 +1211,7 @@ class AdvertisingApi(object):
                 'success': True,
                 'api_version': self.api_version if not api_v3 else versions['api_version_sb'],
                 'code': f.code,
-                'data': f.read().decode('utf-8')}
+                'response': f.read().decode('utf-8')}
 
         except urllib.error.HTTPError as e:
             return {'success': False,
