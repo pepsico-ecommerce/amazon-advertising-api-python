@@ -1048,11 +1048,6 @@ class AdvertisingApi(object):
           Defaults to 'sponsoredProducts.
           :campaign_type: Should be 'hsa' or 'sp'
         """
-        if not data:
-            data = {'campaignType': 'sponsoredProducts'}
-        elif not data.get('campaignType'):
-            data['campaignType'] = 'sponsoredProducts'
-
         if record_type is not None:
             interface = '{}/{}/snapshot'.format(campaign_type, record_type)
             return self._operation(interface, data, method='POST')
