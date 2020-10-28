@@ -1139,6 +1139,7 @@ class AdvertisingApi(object):
                     data = f.read()
                     return {'success': True,
                             'code': res.code,
+                            'api_version': versions["api_version"],
                             'response': json.loads(data.decode('utf-8'))}
                 else:
                     return {'success': False,
