@@ -1079,7 +1079,7 @@ class AdvertisingApi(object):
         interface = 'reports/{}'.format(report_id)
         res = self._operation(interface)
         if res['success']:
-            body = json.loads(res['data'])
+            body = json.loads(res['response'])
             if body.get('status') == 'SUCCESS':
                 res = self._download(location=body['location'])
         return res
@@ -1087,9 +1087,9 @@ class AdvertisingApi(object):
     def get_snapshot(self, snapshot_id):
         interface = 'snapshots/{}'.format(snapshot_id)
         res = self._operation(interface)
-        if json.loads(res['data'])['status'] == 'SUCCESS':
+        if json.loads(res['response'])['status'] == 'SUCCESS':
             res = self._download(
-                location=json.loads(res['data'])['location'])
+                location=json.loads(res['response'])['location'])
             return res
         else:
             return res
@@ -1211,7 +1211,7 @@ class AdvertisingApi(object):
                 'success': True,
                 'api_version': self.api_version if not api_v3 else versions['api_version_sb'],
                 'code': f.code,
-                'data': f.read().decode('utf-8')}
+                'response': f.read().decode('utf-8')}
 
         except urllib.error.HTTPError as e:
             return {'success': False,
