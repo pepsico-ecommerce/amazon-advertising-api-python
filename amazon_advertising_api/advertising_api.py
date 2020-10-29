@@ -1216,6 +1216,7 @@ class AdvertisingApi(object):
 
         except urllib.error.HTTPError as e:
             return {'success': False,
+                    'api_version': self.api_version if not api_v3 else versions['api_version_sb'],
                     'code': e.code,
                     'response': '{msg}: {details}'.format(msg=e.msg, details=e.read())}
 
