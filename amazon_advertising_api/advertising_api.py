@@ -14,6 +14,8 @@ except ImportError:
 import gzip
 import json
 
+DSP_REPORT = "dsp_report"
+
 
 class AdvertisingApi(object):
 
@@ -1065,7 +1067,10 @@ class AdvertisingApi(object):
         :type data: string
         """
         if record_type is not None:
-            interface = '{}/{}/report'.format(campaign_type, record_type)
+            if record_type == DSP_REPORT:
+                interface = 'dsp/reports'
+            else:
+                interface = '{}/{}/report'.format(campaign_type, record_type)
             return self._operation(interface, data, method='POST')
         elif report_id is not None:
             interface = 'reports/{}'.format(report_id)
@@ -1075,8 +1080,10 @@ class AdvertisingApi(object):
                     'code': 0,
                     'response': 'record_type and report_id are both empty.'}
 
-    def get_report(self, report_id):
+    def get_report(self, report_id, report_type=None):
         interface = 'reports/{}'.format(report_id)
+        if report_type is not None and report_type == DSP_REPORT:
+            interface = 'dsp/' + interface
         res = self._operation(interface)
         if res['success']:
             body = json.loads(res['response'])
@@ -1166,6 +1173,7 @@ class AdvertisingApi(object):
         :type method: string
         """
         api_v3 = interface.startswith('sb')
+        dsp_report = interface.startswith('dsp')
 
         if self._access_token is None:
             return {'success': False,
@@ -1187,7 +1195,10 @@ class AdvertisingApi(object):
 
         data = None
 
-        url = f"https://{self.endpoint}/" + ("" if api_v3 else f"{self.api_version}/") + f"{interface}"
+        if api_v3 or dsp_report:
+            url = f"https://{self.endpoint}/{interface}"
+        else:
+            url = f"https://{self.endpoint}/{self.api_version}/{interface}"
 
         if method == 'GET':
             if params is not None:
