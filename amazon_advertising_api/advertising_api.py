@@ -1084,10 +1084,13 @@ class AdvertisingApi(object):
         interface = 'reports/{}'.format(report_id)
         if report_type is not None and report_type == DSP_REPORT:
             interface = 'dsp/' + interface
-        res = self._operation(interface)
+        res = self._operation(interface, report_id=report_id)
         if res['success']:
             body = json.loads(res['response'])
             if body.get('status') == 'SUCCESS':
+                # for dsp report, return response with url for the report instead of the huge report data itself
+                if report_type == DSP_REPORT:
+                    return res
                 res = self._download(location=body['location'])
         return res
 
@@ -1161,7 +1164,7 @@ class AdvertisingApi(object):
                     'code': e.code,
                     'response': '{msg}: {details}'.format(msg=e.msg, details=e.read())}
 
-    def _operation(self, interface, params=None, method='GET'):
+    def _operation(self, interface, params=None, method='GET', report_id=None):
         """
         Makes that actual API call.
 
@@ -1184,6 +1187,8 @@ class AdvertisingApi(object):
                    'Amazon-Advertising-API-ClientId': self.client_id,
                    'Content-Type': 'application/json',
                    'User-Agent': self.user_agent}
+        if report_id is not None:
+            headers['reportId'] = report_id
 
         if self.profile_id is not None and self.profile_id != '':
             headers['Amazon-Advertising-API-Scope'] = self.profile_id
