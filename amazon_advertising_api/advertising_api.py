@@ -1094,6 +1094,23 @@ class AdvertisingApi(object):
                 res = self._download(location=body['location'])
         return res
 
+    def get_dsp_entity(self, interface, media_type):
+        """
+        :GET: dsp/interface
+        :
+        :interface consists of entity_type and query_param, where
+        :  entity_type: advertisers, orders, lineItems, creatives, lineItemCreativeAssociations
+        :  query_param: startIndex=<index>&count=<count>[&<filter>=<comma separated list of filter ids>]
+        :  filter: advertiserIdFilter, orderIdFilter, lineItemIdFilter
+        :media_type example: 'application/vnd.dspbasiclineitems.v3+json'
+        """
+        if interface is None or media_type is None:
+            return {'success': False,
+                    'code': 0,
+                    'response': 'interface and media_type are both empty.'}
+        else:
+            return self._operation(interface, method='GET', media_type=media_type)
+
     def get_snapshot(self, snapshot_id):
         interface = 'snapshots/{}'.format(snapshot_id)
         res = self._operation(interface)
@@ -1164,7 +1181,7 @@ class AdvertisingApi(object):
                     'code': e.code,
                     'response': '{msg}: {details}'.format(msg=e.msg, details=e.read())}
 
-    def _operation(self, interface, params=None, method='GET', report_id=None):
+    def _operation(self, interface, params=None, method='GET', report_id=None, media_type=None):
         """
         Makes that actual API call.
 
@@ -1172,8 +1189,12 @@ class AdvertisingApi(object):
         :type interface: string
         :param params: Parameters associated with this call.
         :type params: GET: string POST: dictionary
-        :param method: Call method. Should be either 'GET', 'PUT', or 'POST'
+        :param method: Call method. Should be either 'GET', 'PUT', or 'POST'.
         :type method: string
+        :param report_id: report_id obtained in previous 'POST' request.
+        :type report_id: string
+        :param media_type: Used for dsp entity 'GET' calls, e.g., 'application/vnd.dsporders.v2.2+json'
+        :type media_type: string
         """
         api_v3 = interface.startswith('sb')
         dsp_report = interface.startswith('dsp')
@@ -1189,6 +1210,8 @@ class AdvertisingApi(object):
                    'User-Agent': self.user_agent}
         if report_id is not None:
             headers['reportId'] = report_id
+        if media_type is not None:
+            headers['Accept'] = media_type
 
         if self.profile_id is not None and self.profile_id != '':
             headers['Amazon-Advertising-API-Scope'] = self.profile_id
