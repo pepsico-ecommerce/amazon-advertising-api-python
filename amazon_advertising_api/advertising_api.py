@@ -1107,7 +1107,7 @@ class AdvertisingApi(object):
         if interface is None or media_type is None:
             return {'success': False,
                     'code': 0,
-                    'response': 'interface and media_type are both empty.'}
+                    'response': 'interface and media_type cannot be empty.'}
         else:
             return self._operation(interface, method='GET', media_type=media_type)
 
