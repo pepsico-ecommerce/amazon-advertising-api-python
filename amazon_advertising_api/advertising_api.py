@@ -1067,7 +1067,7 @@ class AdvertisingApi(object):
           Defaults to 'sp'
         :type data: string
         """
-        if campaign_type == 'sp':
+        if campaign_type == 'sp_v3':
             interface = 'reporting/reports'
             content_type = 'application/vnd.createasyncreportrequest.v3+json'
             return self._operation(interface, data, method='POST', content_type=content_type)
