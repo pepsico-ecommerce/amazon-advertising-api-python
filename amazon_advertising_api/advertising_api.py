@@ -15,7 +15,7 @@ import gzip
 import json
 
 DSP_REPORT = "dsp_report"
-API_V3_REPORT = "api_v3_report"
+API_SP_V3_REPORT = "api_sp_v3_report"
 
 
 class AdvertisingApi(object):
@@ -1067,10 +1067,10 @@ class AdvertisingApi(object):
           Defaults to 'sp'
         :type data: string
         """
-        if campaign_type == 'sp_v3':
+        if campaign_type == API_SP_V3_REPORT:
             interface = 'reporting/reports'
             content_type = 'application/vnd.createasyncreportrequest.v3+json'
-            return self._operation(interface, data, method='POST', content_type=content_type)
+            return self._operation(interface, data, method='POST', content_type=content_type, api_ver=API_SP_V3_REPORT)
         if record_type is not None:
             if record_type == DSP_REPORT:
                 interface = 'dsp/reports'
@@ -1186,7 +1186,7 @@ class AdvertisingApi(object):
                     'code': e.code,
                     'response': '{msg}: {details}'.format(msg=e.msg, details=e.read())}
 
-    def _operation(self, interface, params=None, method='GET', report_id=None, media_type=None, content_type='application/json'):
+    def _operation(self, interface, params=None, method='GET', report_id=None, media_type=None, content_type='application/json', api_ver=None):
         """
         Makes that actual API call.
 
@@ -1201,7 +1201,6 @@ class AdvertisingApi(object):
         :param media_type: Used for dsp entity 'GET' calls, e.g., 'application/vnd.dsporders.v2.2+json'
         :type media_type: string
         """
-        api_v3_sp = interface.startswith('/reporting')
         api_v3 = interface.startswith('sb')
         dsp_report = interface.startswith('dsp')
 
@@ -1229,7 +1228,7 @@ class AdvertisingApi(object):
 
         data = None
 
-        if api_v3 or dsp_report or api_v3_sp:
+        if api_v3 or dsp_report or api_ver is API_SP_V3_REPORT:
             url = f"https://{self.endpoint}/{interface}"
         else:
             url = f"https://{self.endpoint}/{self.api_version}/{interface}"
