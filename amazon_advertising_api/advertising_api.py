@@ -1087,11 +1087,13 @@ class AdvertisingApi(object):
 
     def get_report(self, report_id, report_type=None):
         interface = 'reports/{}'.format(report_id)
+        api_ver = None
         if report_type is not None and report_type == DSP_REPORT:
             interface = 'dsp/' + interface
         elif report_type == API_SP_V3_REPORT:
             interface = 'reporting/' + interface
-        res = self._operation(interface, report_id=report_id)
+            api_ver = API_SP_V3_REPORT
+        res = self._operation(interface, report_id=report_id, api_ver=api_ver)
         if res['success']:
             body = json.loads(res['response'])
             if body.get('status') == 'SUCCESS':
