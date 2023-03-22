@@ -1089,6 +1089,8 @@ class AdvertisingApi(object):
         interface = 'reports/{}'.format(report_id)
         if report_type is not None and report_type == DSP_REPORT:
             interface = 'dsp/' + interface
+        elif report_type == API_SP_V3_REPORT:
+            interface = 'reporting/' + interface
         res = self._operation(interface, report_id=report_id)
         if res['success']:
             body = json.loads(res['response'])
