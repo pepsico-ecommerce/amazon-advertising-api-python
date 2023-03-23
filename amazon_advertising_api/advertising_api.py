@@ -1101,6 +1101,8 @@ class AdvertisingApi(object):
                 if report_type == DSP_REPORT:
                     return res
                 res = self._download(location=body['location'])
+            if report_type == API_SP_V3_REPORT and body.get('status') == 'COMPLETED':
+                return res
         return res
 
     def get_dsp_entity(self, interface, media_type):
