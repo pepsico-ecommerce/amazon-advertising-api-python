@@ -35,7 +35,7 @@ jobs:
         
   call-workflow-versioning:
     needs: [test]
-    uses: pepsico-ecommerce/ops-gh-workflows/.github/workflows/python-bump2version-release.yaml@DEV-3809
+    uses: ./.github/workflows/python-bump2version-release.yaml
     secrets:
       TWINE_USERNAME: ${{ secrets.NEXUS_PYPI_USERNAME }}
       TWINE_PASSWORD: ${{ secrets.NEXUS_PYPI_PASSWORD }}
