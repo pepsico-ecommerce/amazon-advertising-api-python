@@ -56,14 +56,24 @@ jobs:
           bump2version release --serialize {major}.{minor}.{patch} --verbose --allow-dirty
           echo RELEASE_VERSION=$(python setup.py --version) >> $GITHUB_OUTPUT
 
-      - name: Build and publish
+      - name: Build and publish to dev
         env:
           TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+        if: "${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.repository.default_branch == github.ref_name) }}"  
         run: |
           python -m build
           twine upload --repository-url https://nexus.pepstaging.com/repository/pypi-dev/ dist/*
 
+      - name: Build and publish to release
+        env:
+          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+        if: "${{ github.ref_type == 'tag' }}"
+        run: |
+          python -m build
+          twine upload --repository-url https://nexus.pepstaging.com/repository/pypi-release/ dist/*
+            
       - name: Update develop version
         id: dev_version
         if: "${{ github.event_name == 'push' && github.event.repository.default_branch == github.ref_name }}"
