@@ -3,10 +3,10 @@ name: PR build and publish
 on:
   pull_request:
     branches:
-    - master
+    - staging-DEV-3804
   push:
     branches:
-    - master
+    - staging-DEV-3804
 
 defaults:
   run:
