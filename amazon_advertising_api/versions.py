@@ -1,4 +1,4 @@
-__version__ = "0.0.14-dev12"
+__version__ = "0.0.15-alpha"
 
 versions = {
     'api_version': 'v2',
