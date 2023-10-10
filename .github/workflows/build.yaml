@@ -1,0 +1,51 @@
+name: PR build and publish
+
+on:
+  pull_request:
+    branches:
+    - master
+  push:
+    branches:
+    - master
+    tags:
+    - '*'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+        
+  call-workflow-versioning:
+    uses: ./.github/workflows/python-bump2version-release.yaml
+    secrets:
+      TWINE_USERNAME: ${{ secrets.NEXUS_PYPI_USERNAME }}
+      TWINE_PASSWORD: ${{ secrets.NEXUS_PYPI_PASSWORD }}
+
+  pr-update:
+    name: Pull request comment
+    needs: [call-workflow-versioning]
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: technote-space/workflow-conclusion-action@v3
+
+      - name: Post Github comment
+        if: env.WORKFLOW_CONCLUSION == 'success'
+        uses: docker://cloudposse/github-commenter:0.19.0
+        env:
+          GITHUB_OWNER: ${{github.repository_owner}}
+          GITHUB_REPO: ${{github.event.repository.name}}
+          GITHUB_COMMENT_TYPE: pr
+          GITHUB_PR_ISSUE_NUMBER: ${{github.event.number}}
+          GITHUB_TOKEN: ${{github.token}}
+          GITHUB_COMMENT: |
+            Looks good to me! and your package is here <a href=https://nexus.pepstaging.com/#browse/browse:pypi-dev:${{ github.event.repository.name }}/${{ needs.call-workflow-versioning.outputs.pr_version }}>${{ needs.call-workflow-versioning.outputs.pr_version }}</a>
