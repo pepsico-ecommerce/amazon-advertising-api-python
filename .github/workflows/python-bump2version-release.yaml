@@ -54,7 +54,7 @@ jobs:
         id: dev_version
         if: "${{ github.event_name == 'push' && github.event.repository.default_branch == github.ref_name }}"
         run: |
-          bump2version patch --serialize {major}.{minor}.{patch}-{release} --verbose --allow-dirty
+          bump2version patch --verbose --allow-dirty  --no-commit
           echo DEV_VERSION=$(python setup.py --version) >> $GITHUB_OUTPUT
 
       - name: Build and publish to dev
