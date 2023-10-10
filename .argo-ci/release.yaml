@@ -1,0 +1,154 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: amazon-advertising-api-python-release-
+spec:
+  # entrypoint is the name of the template used as the starting point of the workflow
+  entrypoint: run-build
+  # onExit: exit-handler
+  arguments:
+    parameters:
+    - name: git_url
+      value: HAS_TO_BE_PASSED_FROM_SENSOR
+    - name: tag_name
+      value: HAS_TO_BE_PASSED_FROM_SENSOR
+    - name: repo_name
+      value: HAS_TO_BE_PASSED_FROM_SENSOR
+
+  # a temporary volume, named workdir, will be used as a working directory
+  # for this workflow. This volume is passed around from step to step.
+  volumeClaimTemplates:
+  - metadata:
+      name: workdir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+  volumes:
+    - name: sshkey
+      secret:
+        secretName: argo-ci-git-ssh-key
+        items:
+          - key: id_rsa
+            mode: 0400
+            path: id_rsa
+    - name: known-hosts
+      secret:
+        secretName: known-github
+    - name: pypirc
+      secret:
+        secretName: nexus-pypi
+        items:
+          - key: .pypirc
+            path: .pypirc
+
+
+
+  templates:
+  - name: run-build
+    steps:
+    - - name: checkout
+        template: git
+        arguments:
+          parameters:
+          - name: cmd
+            value: >
+              cd /workdir &&
+              git clone {{workflow.parameters.git_url}} &&
+              cd /workdir/{{workflow.parameters.repo_name}} &&
+              git checkout tags/{{workflow.parameters.tag_name}}
+
+    - - name: compare-version
+        template: python
+        arguments:
+          parameters:
+          - name: cmd
+            value: >
+              if [ $(python setup.py --version) = {{workflow.parameters.tag_name}} ];
+              then
+                echo OK;
+              else
+                exit 1;
+              fi
+### add notification to slack if fail
+
+    - - name: get-package-name
+        template: generate-name
+
+    - - name: pack-and-push
+        template: python
+        arguments:
+          parameters:
+          - name: cmd
+            value: >
+              pip install twine &&
+              python3 setup.py sdist bdist_wheel &&
+              twine upload --config-file /etc/pypirc/.pypirc -r pepsico-ecommerce-release dist/*
+
+### slack notification about new version
+
+
+
+  - name: git
+    retryStrategy:
+      limit: 3
+    inputs:
+      parameters:
+      - name: cmd
+    container:
+      image: "alpine/git"
+      command: ["sh", "-c"]
+      args:
+        - >
+          git config --global user.email 'argo-ci@pepsi.co' &&
+          git config --global user.name 'Argo CI' &&
+          {{inputs.parameters.cmd}}
+      volumeMounts:
+      - name: workdir
+        mountPath: /workdir
+      - name: sshkey
+        mountPath: /root/.ssh
+      - mountPath: /etc/ssh
+        name: known-hosts
+
+  - name: python
+    retryStrategy:
+      limit: 3
+    inputs:
+      parameters:
+      - name: cmd
+    container:
+      image: "python:3.7-buster"
+      command: ["sh", "-c"]
+      args:
+        - >
+          cd /workdir/{{workflow.parameters.repo_name}} &&
+          {{inputs.parameters.cmd}}
+      volumeMounts:
+      - name: workdir
+        mountPath: /workdir
+      - name: pypirc
+        mountPath: /etc/pypirc/
+      env:
+        - name: NEXUS_PYPI_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nexus-pypi-ro-creds
+              key: password
+        - name: NEXUS_PYPI_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: nexus-pypi-ro-creds
+              key: username
+
+  - name: generate-name
+    script:
+      image: python:alpine3.7
+      command: [python]
+      source: |
+        repo_name = """
+        {{workflow.parameters.repo_name}}
+        """
+        package_name = repo_name.strip().replace('"', '').replace("'", "").replace('-', '_')
+        print(package_name)
