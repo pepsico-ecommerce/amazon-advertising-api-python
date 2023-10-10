@@ -1,0 +1,254 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: amazon-advertising-api-python-pr-
+spec:
+  # entrypoint is the name of the template used as the starting point of the workflow
+  entrypoint: run-tests
+  onExit: exit-handler
+  arguments:
+    parameters:
+    - name: git_url
+      value: HAS_TO_BE_PASSED_FROM_SENSOR
+    - name: source_branch
+      value: HAS_TO_BE_PASSED_FROM_SENSOR
+    - name: target_branch
+      value: HAS_TO_BE_PASSED_FROM_SENSOR
+    - name: repo_name
+      value: HAS_TO_BE_PASSED_FROM_SENSOR
+    - name: source_sha
+      value: HAS_TO_BE_PASSED_FROM_SENSOR
+    - name: pr_number
+      value: HAS_TO_BE_PASSED_FROM_SENSOR
+  # a temporary volume, named workdir, will be used as a working directory
+  # for this workflow. This volume is passed around from step to step.
+  volumeClaimTemplates:
+  - metadata:
+      name: workdir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+  volumes:
+    - name: sshkey
+      secret:
+        secretName: argo-ci-git-ssh-key
+        items:
+          - key: id_rsa
+            mode: 0400
+            path: id_rsa
+    - name: known-hosts
+      secret:
+        secretName: known-github
+    - name: pypirc
+      secret:
+        secretName: nexus-pypi
+        items:
+          - key: .pypirc
+            path: .pypirc
+
+
+
+  templates:
+  - name: run-tests
+    steps:
+    - - name: set-pending
+        template: status-update
+        arguments:
+          parameters:
+          - name: status
+            value: pending
+          - name: message
+            value: Argo CI tests has been started
+
+    - - name: checkout
+        template: git
+        arguments:
+          parameters:
+          - name: cmd
+            value: >
+              cd /workdir &&
+              git clone {{workflow.parameters.git_url}} &&
+              cd {{workflow.parameters.repo_name}} &&
+              git fetch &&
+              git merge origin/{{workflow.parameters.source_branch}}
+
+    - - name: get-package-name
+        template: generate-name
+
+    - - name: version-bump
+        template: python
+        arguments:
+          parameters:
+          - name: cmd
+            value: >
+              pip install bump2version &&
+              git config --global user.email 'argo-ci@pepsi.co' &&
+              git config --global user.name 'Argo CI' &&
+              bump2version release --allow-dirty --verbose
+              --serialize 0.0.0-dev{{workflow.parameters.source_sha}} &&
+              python setup.py -V > /version
+
+    - - name: pack-and-push
+        template: python
+        arguments:
+          parameters:
+          - name: cmd
+            value: >
+              pip install twine &&
+              python3 setup.py sdist bdist_wheel &&
+              twine upload --verbose --config-file /etc/pypirc/.pypirc -r pepsico-ecommerce-dev dist/*
+
+    - - name: comment-pr
+        template: PR-comment
+        arguments:
+          parameters:
+          - name: message
+            value: "Looks good to me! and your package is here \
+            <a href=https://nexus.pepstaging.com/#browse/browse:pypi-dev:{{workflow.parameters.repo_name}}/{{steps.version-bump.outputs.parameters.version}}>{{steps.version-bump.outputs.parameters.version}}</a>"
+
+
+
+  - name: exit-handler
+    steps:
+    - - name: success
+        template: status-update
+        arguments:
+          parameters:
+          - name: status
+            value: success
+          - name: message
+            value: All tests has passed in argo ci
+        when: "{{workflow.status}} == Succeeded"
+      - name: failure
+        template: status-update
+        arguments:
+          parameters:
+          - name: status
+            value: failure
+          - name: message
+            value: Some tests has failed, check details for logs
+        when: "{{workflow.status}} != Succeeded"
+
+  - name: git
+    inputs:
+      parameters:
+      - name: cmd
+    container:
+      image: "alpine/git"
+      command: ["sh", "-c"]
+      args:
+      - >
+        git config --global user.email 'argo-ci@pepsi.co' &&
+        git config --global user.name 'Argo CI' &&
+        {{inputs.parameters.cmd}}
+      volumeMounts:
+      - name: workdir
+        mountPath: /workdir
+      - name: sshkey
+        mountPath: /root/.ssh
+      - mountPath: /etc/ssh
+        name: known-hosts
+
+  - name: python
+    inputs:
+      parameters:
+      - name: cmd
+    outputs:
+      parameters:
+      - name: version		# name of output parameter
+        valueFrom:
+          path: /version
+    container:
+      image: "python:3.7-buster"
+      command: ["sh", "-c"]
+      args:
+      - >
+        touch /version &&
+        cd /workdir/{{workflow.parameters.repo_name}} &&
+        {{inputs.parameters.cmd}}
+      volumeMounts:
+      - name: workdir
+        mountPath: /workdir
+      - name: pypirc
+        mountPath: /etc/pypirc/
+      env:
+        - name: NEXUS_PYPI_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nexus-pypi-ro-creds
+              key: password
+        - name: NEXUS_PYPI_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: nexus-pypi-ro-creds
+              key: username
+
+  - name: status-update
+    inputs:
+      parameters:
+      - name: status
+      - name: message
+    container:
+      image: cloudposse/github-status-updater
+      env:
+      - name: GITHUB_ACTION
+        value: update_state
+      - name: GITHUB_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: github-access-token
+            key: token
+      - name: GITHUB_OWNER
+        value: pepsico-ecommerce
+      - name: GITHUB_REPO
+        value: "{{workflow.parameters.repo_name}}"
+      - name: GITHUB_REF
+        value: "{{workflow.parameters.source_sha}}"
+      - name: GITHUB_CONTEXT
+        value: Argo CI Workflow
+      - name: GITHUB_STATE
+        value: "{{inputs.parameters.status}}"
+      - name: GITHUB_DESCRIPTION
+        value: "{{inputs.parameters.message}}"
+      - name: GITHUB_TARGET_URL
+        value: "https://argo-wf.pepstaging.com/workflows/argo-events/{{workflow.name}}"
+
+  - name: PR-comment
+    inputs:
+      parameters:
+      - name: message
+    container:
+      image: cloudposse/github-commenter
+      env:
+      - name: GITHUB_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: github-access-token
+            key: token
+      - name: GITHUB_OWNER
+        value: pepsico-ecommerce
+      - name: GITHUB_REPO
+        value: "{{workflow.parameters.repo_name}}"
+      - name: GITHUB_COMMENT_TYPE
+        value: pr
+      - name: GITHUB_PR_ISSUE_NUMBER
+        value: "{{workflow.parameters.pr_number}}"
+      - name: GITHUB_COMMENT_FORMAT
+        value: "Argo CI comment: {{.}}"
+      - name: GITHUB_COMMENT
+        value: "{{inputs.parameters.message}}"
+      - name: GITHUB_DELETE_COMMENT_REGEX
+        value: "^Argo CI comment"
+
+  - name: generate-name
+    script:
+      image: python:alpine3.7
+      command: [python]
+      source: |
+        repo_name = """
+        {{workflow.parameters.repo_name}}
+        """
+        package_name = repo_name.strip().replace('"', '').replace("'", "").replace('-', '_')
+        print(package_name)
