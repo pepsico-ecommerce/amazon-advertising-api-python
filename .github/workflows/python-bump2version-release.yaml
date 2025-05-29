@@ -16,13 +16,13 @@ on:
         required: true
 
 jobs:
-  increase-version:
-    name: Increase version
+  increase-version-dev:
+    name: Increase version dev
     outputs:
       development_version: ${{ steps.dev_version.outputs.DEV_VERSION }}
       release_version: ${{ steps.release_version.outputs.RELEASE_VERSION }}
       pr_version: ${{ steps.pr_version.outputs.PR_VERSION }}
-    runs-on: ubuntu-latest
+    runs-on: gha-ss-airflow-preprod-org-runners
     steps:
 
       - name: Checkout code
@@ -37,7 +37,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip build wheel twine
           pip install bump2version
           git config --global user.email 'pepecomminfra@pepsico.com'
           git config --global user.name 'Github Actions'
@@ -49,7 +48,6 @@ jobs:
           bump2version release --allow-dirty --verbose --serialize {major}.{minor}.{patch}-dev${{ github.event.number }}${{github.run_number}}
           echo PR_VERSION=$(python setup.py --version) >> $GITHUB_OUTPUT
 
-
       - name: Update develop version
         id: dev_version
         if: "${{ github.event_name == 'push' && github.event.repository.default_branch == github.ref_name }}"
@@ -57,15 +55,19 @@ jobs:
           bump2version patch --verbose --allow-dirty  --no-commit
           echo DEV_VERSION=$(python setup.py --version) >> $GITHUB_OUTPUT
 
-      - name: Build and publish to dev
-        env:
-          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-        if: "${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.repository.default_branch == github.ref_name) }}"  
-        run: |
-          python -m build
-          twine upload --repository-url https://nexus.pepstaging.com/repository/pypi-dev/ dist/*
+  build-and-publish-dev:
+    needs: [increase-version-dev]
+    uses: pepsico-ecommerce/data-platform-reusable/.github/workflows/build-push.yml@main
+    with:
+      repository_url: 'https://pepecomm.pe.jfrog.io/artifactory/api/pypi/pypi-dev/'
+    secrets:
+      UV_INDEX_JFROG_USERNAME: ${{ secrets.UV_INDEX_JFROG_USERNAME }}
+      UV_INDEX_JFROG_PASSWORD: ${{ secrets.UV_INDEX_JFROG_PASSWORD }}
 
+  increase-version-release:
+    name: Increase version release
+    runs-on: gha-ss-airflow-preprod-org-runners
+    steps:
       - name: Release version
         id: release_version
         if: "${{ github.event_name == 'push' && github.event.repository.default_branch == github.ref_name }}"
@@ -77,15 +79,11 @@ jobs:
         if: "${{ github.event_name == 'push' && github.event.repository.default_branch == github.ref_name }}"
         run: |
           git push origin ${{ github.ref_name }}
-    
-    
-      - name: Build and publish to release
-        env:
-          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-        if: "${{ github.ref_type == 'tag' }}"
-        run: |
-          python -m build
-          twine upload --repository-url https://nexus.pepstaging.com/repository/pypi-release/ dist/*
-            
-   
+
+  build-and-publish-release:
+    uses: pepsico-ecommerce/data-platform-reusable/.github/workflows/build-push.yml@main
+    with:
+      repository_url: 'https://pepecomm.pe.jfrog.io/artifactory/api/pypi/pypi-release/'
+    secrets:
+      UV_INDEX_JFROG_USERNAME: ${{ secrets.UV_INDEX_JFROG_USERNAME }}
+      UV_INDEX_JFROG_PASSWORD: ${{ secrets.UV_INDEX_JFROG_PASSWORD }}
