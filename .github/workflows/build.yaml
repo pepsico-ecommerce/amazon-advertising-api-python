@@ -22,16 +22,18 @@ jobs:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 1
-        
-  call-workflow-versioning:
-    uses: ./.github/workflows/python-bump2version-release.yaml
+
+  build-and-publish-dev:
+    uses: pepsico-ecommerce/data-platform-reusable/.github/workflows/build-push.yml@main
+    with:
+      repository_url: 'https://pepecomm.pe.jfrog.io/artifactory/api/pypi/pypi-dev/'
     secrets:
-      TWINE_USERNAME: ${{ secrets.NEXUS_PYPI_USERNAME }}
-      TWINE_PASSWORD: ${{ secrets.NEXUS_PYPI_PASSWORD }}
+      UV_INDEX_JFROG_USERNAME: ${{ secrets.UV_INDEX_JFROG_USERNAME }}
+      UV_INDEX_JFROG_PASSWORD: ${{ secrets.UV_INDEX_JFROG_PASSWORD }}
 
   pr-update:
     name: Pull request comment
-    needs: [call-workflow-versioning]
+    needs: [build-and-publish-dev]
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:

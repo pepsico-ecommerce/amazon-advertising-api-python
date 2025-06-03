@@ -1,0 +1,65 @@
+# This workflow will upload the package to Nexus Artifactory using Twine
+
+name: staging-build
+
+on:
+  push:
+    branches:
+      - master
+
+defaults:
+  run:
+    shell: bash
+
+
+# Parallelize jobs that can be for this workflow/ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bump-version:
+    name: bump-version
+    runs-on: gha-ss-airflow-preprod-org-runners
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: master
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Bump version
+      run: |
+        pip install bump2version
+
+        git config --global user.email 'pepecommops@pepsico.com'
+        git config --global user.name 'pepecommops'
+
+        bump2version patch \
+        --serialize {major}.{minor}.{patch} \
+        --verbose \
+        --allow-dirty
+
+        git push origin master
+
+  build-and-publish:
+    needs: [bump-version]
+    uses: pepsico-ecommerce/data-platform-reusable/.github/workflows/build-push.yml@main
+    with:
+      repository_url: 'https://pepecomm.pe.jfrog.io/artifactory/api/pypi/pypi-dev/'
+    secrets:
+      UV_INDEX_JFROG_USERNAME: ${{ secrets.UV_INDEX_JFROG_USERNAME }}
+      UV_INDEX_JFROG_PASSWORD: ${{ secrets.UV_INDEX_JFROG_PASSWORD }}
+
+  update_release_draft:
+    needs: [build-and-publish]
+    runs-on: gha-ss-airflow-preprod-org-runners
+    steps:
+      - uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
