@@ -25,9 +25,6 @@ jobs:
         
   call-workflow-versioning:
     uses: ./.github/workflows/python-bump2version-release.yaml
-    secrets:
-      TWINE_USERNAME: ${{ secrets.NEXUS_PYPI_USERNAME }}
-      TWINE_PASSWORD: ${{ secrets.NEXUS_PYPI_PASSWORD }}
 
   pr-update:
     name: Pull request comment
