@@ -2,10 +2,26 @@ name: Manage version of Python package
 
 on:
   workflow_call:
+    outputs:
+      development_version:
+        value: ${{ jobs.increase-version.outputs.development_version }}
+      release_version:
+        value: ${{ jobs.increase-version.outputs.release_version }}
+      pr_version:
+        value: ${{ jobs.increase-version.outputs.pr_version }}
+    secrets:
+      TWINE_USERNAME:
+        required: true
+      TWINE_PASSWORD:
+        required: true
 
 jobs:
   increase-version-dev:
     name: Increase version dev
+    outputs:
+      development_version: ${{ steps.dev_version.outputs.DEV_VERSION }}
+      release_version: ${{ steps.release_version.outputs.RELEASE_VERSION }}
+      pr_version: ${{ steps.pr_version.outputs.PR_VERSION }}
     runs-on: gha-ss-airflow-preprod-org-runners
     steps:
 
@@ -20,7 +36,6 @@ jobs:
           python-version: "3.7"
 
   build-and-publish-dev:
-    runs-on: gha-ss-airflow-preprod-org-runners
     needs: [increase-version-dev]
     uses: pepsico-ecommerce/data-platform-reusable/.github/workflows/build-push.yml@main
     with:
