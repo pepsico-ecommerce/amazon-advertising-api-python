@@ -1,0 +1,107 @@
+name: Build & Push Python Package to JFrog
+
+on:
+  workflow_call:
+    inputs:
+      repository-url:
+        required: true
+        type: string
+        description: 'The JFrog Artifactory repository URL to push to'
+      python-version:
+        required: false
+        type: string
+        default: '3.10'
+        description: 'Python version to use'
+      version-path:
+        required: false
+        type: string
+        default: 'setup.py'
+        description: 'Path to the file containing the version info (e.g., setup.py)'
+      runner:
+        required: false
+        type: string
+        default: 'gha-ss-airflow-preprod-org-runners'
+        description: 'GitHub runner to use'
+    outputs:
+      package_version:
+        value: ${{ jobs.push-package.outputs.version }}
+        description: "Package version that was published"
+    secrets:
+      UV_INDEX_JFROG_USERNAME:
+        required: true
+      UV_INDEX_JFROG_PASSWORD:
+        required: true
+
+jobs:
+  push-package:
+    name: Build and Push Python Package
+    runs-on: ${{ inputs.runner }}
+    outputs:
+      version: ${{ steps.extract_version.outputs.VERSION }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Debug CWD and list files before build
+        shell: bash
+        run: |
+          echo "Current directory (before build-and-publish):"
+          pwd
+          echo "Listing files in current directory:"
+          ls -la
+          echo "Checking for setup.py in current directory:"
+          if [ -f "setup.py" ]; then
+            echo "setup.py FOUND in current directory."
+          else
+            echo "setup.py NOT FOUND in current directory."
+            echo "Checking parent directory:"
+            ls -la ..
+          fi
+
+      - name: Extract Version
+        id: extract_version
+        run: |
+          echo "${{ inputs.version-path }}"
+          if [ -r "${{ inputs.version-path }}" ]; then
+            echo "${{ inputs.version-path }}"
+            # Extract version from setup.py or similar file
+            VERSION=$(cat "${{ inputs.version-path }}" | grep -i 'version[ _]*=[ ]*["\'\''][0-9]\+\.[0-9]\+\.[0-9]\+' | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+            echo "$VERSION"
+            if [ -z "$VERSION" ]; then
+              # Try getting it with setuptools if direct grep fails
+              python -c "import setuptools; exec(open('${{ inputs.version-path }}').read()); print(__version__ if 'version' not in locals() else version)" > version.txt 2>/dev/null || true
+              if [ -s version.txt ]; then
+                VERSION=$(cat version.txt | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+              fi
+            fi
+            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "Version file not found at ${{ inputs.version-path }}"
+            echo "VERSION=unknown" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install twine
+
+      - name: Build and publish
+        env:
+          TWINE_USERNAME: ${{ secrets.UV_INDEX_JFROG_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.UV_INDEX_JFROG_PASSWORD }}
+        run: |
+          python3 setup.py sdist bdist_wheel
+          twine upload --non-interactive -u $TWINE_USERNAME -p $TWINE_PASSWORD --repository-url "${{ inputs.repository-url }}" dist/* 
+          
+      - name: Display Published Version
+        run: |
+          echo "Published package version: ${{ steps.extract_version.outputs.VERSION }}"
