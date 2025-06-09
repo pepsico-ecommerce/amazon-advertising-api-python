@@ -74,7 +74,7 @@ jobs:
           if [ -r "${{ inputs.version-path }}" ]; then
             echo "${{ inputs.version-path }}"
             # Extract version from setup.py or similar file
-            VERSION=$(cat "${{ inputs.version-path }}" | grep -i 'version[ ]*=[ ]*["\'\''][0-9]\+\.[0-9]\+\.[0-9]\+' | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+            VERSION=$(cat "${{ inputs.version-path }}" | grep -i 'version[ _]*=[ ]*["\'\''][0-9]\+\.[0-9]\+\.[0-9]\+' | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
             echo "$VERSION"
             if [ -z "$VERSION" ]; then
               # Try getting it with setuptools if direct grep fails
