@@ -19,7 +19,7 @@ env:
 jobs:
     prepare:
       name: prepare
-      runs-on: gha-ss-airflow-preprod-org-runners
+      runs-on: ubuntu-latest
       outputs:
           short_sha: ${{ steps.commit_metadata.outputs.short_sha }}
 
@@ -36,7 +36,7 @@ jobs:
             
     cancel_previous_builds:
       name: cancel_previous_builds
-      runs-on: gha-ss-airflow-preprod-org-runners
+      runs-on: ubuntu-latest
       steps:
           - uses: rokroskar/workflow-run-cleanup-action@v0.3.0
       env:
@@ -47,7 +47,7 @@ jobs:
       with:
           repository-url: 'https://pepecomm.pe.jfrog.io/artifactory/api/pypi/pypi-dev/'
           python-version: '3.10'
-          runner: 'gha-ss-airflow-preprod-org-runners'
+          runner: 'ubuntu-latest'
           version-path: 'amazon_advertising_api/versions.py'
       secrets:
           UV_INDEX_JFROG_USERNAME: ${{ secrets.UV_INDEX_JFROG_USERNAME }}
