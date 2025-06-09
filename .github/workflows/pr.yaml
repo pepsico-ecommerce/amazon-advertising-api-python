@@ -19,7 +19,7 @@ env:
 jobs:
     prepare:
       name: prepare
-      runs-on: ubuntu-latest
+      runs-on: gha-ss-airflow-preprod-org-runners
       outputs:
           short_sha: ${{ steps.commit_metadata.outputs.short_sha }}
 
@@ -36,7 +36,7 @@ jobs:
             
     cancel_previous_builds:
       name: cancel_previous_builds
-      runs-on: ubuntu-latest
+      runs-on: gha-ss-airflow-preprod-org-runners
       steps:
           - uses: rokroskar/workflow-run-cleanup-action@v0.3.0
       env:
