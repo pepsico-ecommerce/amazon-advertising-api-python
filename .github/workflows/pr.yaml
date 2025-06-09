@@ -1,0 +1,88 @@
+# This workflow will upload the package to Nexus Artifactory using Twine
+
+name: pr-build
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  SHORT_SHA_LEN: 7
+
+jobs:
+    prepare:
+      name: prepare
+      runs-on: ubuntu-latest
+      outputs:
+          short_sha: ${{ steps.commit_metadata.outputs.short_sha }}
+
+      steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Commit metadata
+        id: commit_metadata
+        run: |
+          SHORT_SHA=$(git rev-list -1 HEAD | head -c $SHORT_SHA_LEN)
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+            
+    cancel_previous_builds:
+      name: cancel_previous_builds
+      runs-on: ubuntu-latest
+      steps:
+          - uses: rokroskar/workflow-run-cleanup-action@v0.3.0
+      env:
+          GITHUB_TOKEN: ${{github.token}}
+
+    build-and-publish:
+      uses: ./.github/workflows/build-push.yaml
+      with:
+          repository-url: 'https://pepecomm.pe.jfrog.io/artifactory/api/pypi/pypi-dev/'
+          python-version: '3.10'
+          runner: 'gha-ss-airflow-preprod-org-runners'
+          version-path: 'amazon_advertising_api/versions.py'
+      secrets:
+          UV_INDEX_JFROG_USERNAME: ${{ secrets.UV_INDEX_JFROG_USERNAME }}
+          UV_INDEX_JFROG_PASSWORD: ${{ secrets.UV_INDEX_JFROG_PASSWORD }}
+
+    post_pr_info_block:
+      name: Pull request comment
+      needs: [build-and-publish, prepare]
+      runs-on: ubuntu-latest
+      if: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+
+      steps:
+
+          - name: Find Github Comment
+            uses: pepsico-ecommerce/find-comment-ext@v3
+            id: fc
+            with:
+              issue-number: ${{ github.event.pull_request.number }}
+              comment-author: 'github-actions[bot]'
+              body-includes: Your python package was deployed
+
+          - name: Create or update Github Comment
+            env:
+              GITHUB_OWNER: ${{github.repository_owner}}
+              GITHUB_REPO: ${{github.event.repository.name}}
+              GITHUB_COMMENT_TYPE: pr
+              GITHUB_PR_ISSUE_NUMBER: ${{github.event.number}}
+              GITHUB_TOKEN: ${{github.token}}
+            uses: pepsico-ecommerce/create-or-update-comment-ext@v4
+            with:
+              comment-id: ${{ steps.fc.outputs.comment-id }}
+              issue-number: ${{ github.event.pull_request.number }}
+              edit-mode: replace
+              body: |
+                  Your python package was deployed to
+                  https://pepecomm.pe.jfrog.io/ui/packages/pypi:%2F%2Finstacart-advertising-client?name=instacart-advertising-client&type=packages/
+                  Package version: ${{ needs.build-and-publish.outputs.package_version }}
+                  Commit SHA: ${{ needs.prepare.outputs.short_sha }}
