@@ -89,10 +89,6 @@ jobs:
             echo "VERSION=unknown" >> $GITHUB_OUTPUT
           fi
 
-      - name: Verify JFrog credentials
-        run: |
-          curl -u ${{ secrets.UV_INDEX_JFROG_USERNAME }}:${{ secrets.UV_INDEX_JFROG_PASSWORD }} https://pepecomm.pe.jfrog.io/artifactory/api/system/ping
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
